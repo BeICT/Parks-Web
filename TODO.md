@@ -1,0 +1,3 @@
+- Make sure Paths could only be placed in a grid and not overlap eachother
+- Make sure Rides can be placed etc
+- Notifications should be in-game, not browser alerts
