@@ -47,6 +47,59 @@ export interface ParkObjective {
   reward: number;
 }
 
+export interface MarketingCampaign {
+  id: string;
+  type: 'radio' | 'tv' | 'newspaper' | 'online' | 'billboard';
+  name: string;
+  cost: number;
+  duration: number; // in days
+  effectiveness: number; // 0-100
+  targetAudience: 'families' | 'teens' | 'adults' | 'seniors' | 'all';
+  expectedVisitorIncrease: number;
+  active: boolean;
+  daysRemaining: number;
+}
+
+export interface WeatherEvent {
+  type: 'sunny' | 'cloudy' | 'rainy' | 'stormy' | 'snow' | 'heatwave';
+  intensity: number; // 0-100
+  duration: number; // in hours
+  visitorMultiplier: number;
+  rideAvailabilityMultiplier: number;
+  description: string;
+}
+
+export interface ParkEvent {
+  id: string;
+  type: 'celebrity_visit' | 'maintenance_issue' | 'safety_inspection' | 'holiday_bonus' | 'supplier_discount';
+  title: string;
+  description: string;
+  impact: {
+    money?: number;
+    reputation?: number;
+    visitors?: number;
+    duration?: number; // in days
+  };
+  choices?: Array<{
+    text: string;
+    consequence: {
+      money?: number;
+      reputation?: number;
+      visitors?: number;
+    };
+  }>;
+}
+
+export interface ParkAnalytics {
+  dailyVisitors: number[];
+  dailyRevenue: number[];
+  ridePopularity: Map<string, number>;
+  visitorSatisfaction: number[];
+  staffEfficiency: number[];
+  monthlyProfit: number[];
+  seasonalTrends: Map<string, number>;
+}
+
 export class Park {
   public name: string;
   public stats: GameStats;
@@ -62,6 +115,15 @@ export class Park {
   public parkValue: number = 0;
   public weather: 'sunny' | 'cloudy' | 'rainy' | 'snowy' = 'sunny';
   public season: 'spring' | 'summer' | 'fall' | 'winter' = 'fall';
+  public marketingCampaigns: MarketingCampaign[] = [];
+  public currentWeatherEvent: WeatherEvent | null = null;
+  public pendingEvents: ParkEvent[] = [];
+  public analytics: ParkAnalytics;
+  public reputation: number = 50; // 0-100
+  public safetyRating: number = 100; // 0-100
+  public cleanlinessRating: number = 100; // 0-100
+  public entertainmentRating: number = 50; // 0-100
+  public priceStrategy: 'budget' | 'standard' | 'premium' = 'standard';
   private lastUpdateTime: number = 0;
   private gameDate: Date;
   private gameSpeed: number = 1;
@@ -69,6 +131,8 @@ export class Park {
   private visitorSpawnTimer: number = 0;
   private monthlyExpenses: number = 0;
   private monthlyIncome: number = 0;
+  private eventCooldown: number = 0;
+  private dailyVisitorTarget: number = 100;
 
   constructor(name: string = 'My Amazing Park') {
     this.name = name;
@@ -81,8 +145,19 @@ export class Park {
     this.size = { width: 100, height: 100 };
     this.gameDate = new Date(1, 9, 1); // October Year 1
     this.lastUpdateTime = Date.now();
+    this.analytics = {
+      dailyVisitors: [],
+      dailyRevenue: [],
+      ridePopularity: new Map(),
+      visitorSatisfaction: [],
+      staffEfficiency: [],
+      monthlyProfit: [],
+      seasonalTrends: new Map()
+    };
     this.initializeObjectives();
     this.initializeStartingFacilities();
+    this.initializeResearchTree();
+    this.generateWeatherEvent();
   }
 
   private initializeObjectives(): void {
@@ -139,6 +214,86 @@ export class Park {
       customerCapacity: 8,
       currentCustomers: 0
     });
+  }
+
+  private initializeResearchTree(): void {
+    this.research = [
+      {
+        id: 'better_maintenance',
+        name: 'Advanced Maintenance',
+        cost: 5000,
+        duration: 30, // days
+        progress: 0,
+        completed: false,
+        type: 'efficiency'
+      },
+      {
+        id: 'marketing_boost',
+        name: 'Marketing Research',
+        cost: 8000,
+        duration: 45,
+        progress: 0,
+        completed: false,
+        type: 'marketing'
+      },
+      {
+        id: 'new_ride_tech',
+        name: 'Advanced Ride Technology',
+        cost: 12000,
+        duration: 60,
+        progress: 0,
+        completed: false,
+        type: 'ride'
+      },
+      {
+        id: 'facility_upgrade',
+        name: 'Facility Improvements',
+        cost: 6000,
+        duration: 35,
+        progress: 0,
+        completed: false,
+        type: 'facility'
+      }
+    ];
+  }
+
+  private generateWeatherEvent(): void {
+    const weatherTypes: WeatherEvent[] = [
+      {
+        type: 'sunny',
+        intensity: 80,
+        duration: 8,
+        visitorMultiplier: 1.2,
+        rideAvailabilityMultiplier: 1.0,
+        description: 'Perfect sunny weather brings more visitors!'
+      },
+      {
+        type: 'cloudy',
+        intensity: 50,
+        duration: 6,
+        visitorMultiplier: 0.9,
+        rideAvailabilityMultiplier: 1.0,
+        description: 'Cloudy skies with comfortable temperatures'
+      },
+      {
+        type: 'rainy',
+        intensity: 70,
+        duration: 4,
+        visitorMultiplier: 0.4,
+        rideAvailabilityMultiplier: 0.6,
+        description: 'Heavy rain forces some rides to close'
+      },
+      {
+        type: 'heatwave',
+        intensity: 95,
+        duration: 12,
+        visitorMultiplier: 0.7,
+        rideAvailabilityMultiplier: 0.8,
+        description: 'Extreme heat makes visitors seek shade'
+      }
+    ];
+
+    this.currentWeatherEvent = weatherTypes[Math.floor(Math.random() * weatherTypes.length)];
   }
 
   public addRide(ride: Ride): boolean {
