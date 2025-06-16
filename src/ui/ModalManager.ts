@@ -799,46 +799,130 @@ Nausea: ${ride.nausea}/10
   private showStaffDetails(staff: any): void {
     alert(`Staff Details:\n\nName: ${staff.name}\nType: ${staff.type}\nWage: ${staff.wage}\nEfficiency: ${staff.efficiency}\nArea: ${staff.area}\n\n(Full staff management would be implemented here)`);
   }
-
   private createGuestsWindow(): ModalWindow {
     const content = document.createElement('div');
-    content.innerHTML = `
-      <h3>Guest Information</h3>
-      <div style="margin-bottom: 10px;">
-        <strong>Current Guests in Park: 156</strong>
-      </div>
-
-      <div style="border: 1px inset #c0c0c0; height: 200px; overflow-y: auto; padding: 5px;">
-        <div style="padding: 5px; margin: 2px; background: #fff; border: 1px solid #999;">
-          <strong>👨 John Smith</strong><br>
-          Happiness: 😊 85% | Money: $45<br>
-          Thoughts: "This park is amazing! The roller coaster was thrilling!"
-        </div>
-        <div style="padding: 5px; margin: 2px; background: #fff; border: 1px solid #999;">
-          <strong>👩 Emma Johnson</strong><br>
-          Happiness: 😐 60% | Money: $23<br>
-          Thoughts: "I'm getting hungry... need to find food."
-        </div>
-        <div style="padding: 5px; margin: 2px; background: #fff; border: 1px solid #999;">
-          <strong>👦 Tommy Wilson</strong><br>
-          Happiness: 😄 90% | Money: $12<br>
-          Thoughts: "The carousel is so much fun! I want to ride again!"
-        </div>
-        <div style="padding: 5px; margin: 2px; background: #fff; border: 1px solid #999;">
-          <strong>👵 Mary Davis</strong><br>
-          Happiness: 😞 30% | Money: $67<br>
-          Thoughts: "These paths are so dirty! Where are the janitors?"
-        </div>
+    
+    // Title
+    const title = document.createElement('h3');
+    title.textContent = 'Guest Information';
+    title.style.cssText = `
+      margin: 0 0 8px 0;
+      font-size: 12px;
+      font-weight: bold;
+      color: #000;
+    `;
+    content.appendChild(title);
+    
+    // Summary stats
+    const summaryPanel = this.createPanel('Park Overview');
+    summaryPanel.innerHTML = `
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 11px; margin-bottom: 8px;">
+        <div><strong>Guests in Park:</strong> 156</div>
+        <div><strong>Average Happiness:</strong> 78%</div>
+        <div><strong>Average Money:</strong> $32</div>
+        <div><strong>Total Spent:</strong> $4,890</div>
       </div>
     `;
+    content.appendChild(summaryPanel);
+    
+    // Guest filters
+    const filterPanel = document.createElement('div');
+    filterPanel.style.cssText = 'margin-bottom: 8px; text-align: center;';
+    
+    const filterOptions = ['All Guests', 'Happy', 'Unhappy', 'Big Spenders', 'Lost'];
+    
+    filterOptions.forEach(filter => {
+      const btn = this.createButton(filter, () => {
+        this.filterGuests(filter);
+      });
+      btn.style.margin = '2px 3px';
+      btn.style.fontSize = '10px';
+      if (filter === 'All Guests') {
+        btn.style.background = '#9090ff';
+        btn.style.color = '#fff';
+      }
+      filterPanel.appendChild(btn);
+    });
+    
+    content.appendChild(filterPanel);
+    
+    // Guest list
+    const guestPanel = this.createPanel('Individual Guests');
+    guestPanel.style.height = '200px';
+    guestPanel.style.overflowY = 'auto';
+    
+    const guests = [
+      { name: 'John Smith', happiness: 85, money: 45, thoughts: 'This park is amazing! The roller coaster was thrilling!', status: '😊' },
+      { name: 'Emma Johnson', happiness: 60, money: 23, thoughts: 'I\'m getting hungry... need to find food.', status: '😐' },
+      { name: 'Tommy Wilson', happiness: 90, money: 12, thoughts: 'The carousel is so much fun! I want to ride again!', status: '😄' },
+      { name: 'Mary Davis', happiness: 30, money: 67, thoughts: 'These paths are so dirty! Where are the janitors?', status: '😞' },
+      { name: 'Alex Chen', happiness: 75, money: 38, thoughts: 'Great selection of rides, but the queues are long.', status: '😊' }
+    ];
+    
+    guests.forEach(guest => {
+      const guestItem = this.createListItem(
+        `<strong>${guest.status} ${guest.name}</strong><br>
+         Happiness: ${guest.happiness}% | Money: $${guest.money}<br>
+         <em>"${guest.thoughts}"</em>`,
+        'Click for guest details'
+      );
+      
+      guestItem.onclick = () => {
+        this.showGuestDetails(guest);
+      };
+      
+      guestPanel.appendChild(guestItem);
+    });
+    
+    content.appendChild(guestPanel);
+    
+    // Guest management actions
+    const actionPanel = this.createPanel('Guest Management');
+    const generateBtn = this.createButton('Generate More Guests', () => {
+      this.generateMoreGuests();
+    });
+    generateBtn.style.display = 'block';
+    generateBtn.style.margin = '4px auto';
+    actionPanel.appendChild(generateBtn);
+    
+    content.appendChild(actionPanel);
     
     return {
       id: 'guests',
       title: 'Guest Information',
       content,
-      width: 500,
-      height: 350
+      width: 520,
+      height: 450
     };
+  }
+
+  private filterGuests(filter: string): void {
+    console.log('Filtering guests by:', filter);
+    // In a real implementation, this would filter the guest list
+  }
+
+  private showGuestDetails(guest: any): void {
+    const details = `Guest Details: ${guest.name}
+
+Happiness: ${guest.happiness}%
+Money: $${guest.money}
+Current Thoughts: "${guest.thoughts}"
+
+Recent Activities:
+- Rode the carousel (10 minutes ago)
+- Bought cotton candy (15 minutes ago)
+- Used restroom (20 minutes ago)
+
+(Full guest tracking would be implemented here)`;
+    
+    alert(details);
+  }
+
+  private generateMoreGuests(): void {
+    const confirm = window.confirm('Launch marketing campaign to attract more guests?\n\nCost: $500\nExpected new guests: 20-30');
+    if (confirm) {
+      this.eventManager.emit('marketing-campaign', { cost: 500, expectedGuests: 25 });
+    }
   }
 
   private createSceneryWindow(): ModalWindow {

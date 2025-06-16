@@ -106,7 +106,8 @@ export type GameEvent =
   | { type: 'fire-staff', payload: { staffId: string } }
   | { type: 'staff-details', payload: any }
   | { type: 'start-research', payload: any }
-  | { type: 'complete-research', payload: any };
+  | { type: 'complete-research', payload: any }
+  | { type: 'marketing-campaign', payload: { cost: number, expectedGuests: number } };
 
 export type EventCallback = (data?: any) => void;
 
