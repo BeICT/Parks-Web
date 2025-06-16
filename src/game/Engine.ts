@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { Scene } from './Scene';
 import { Camera } from './Camera';
 import { Park } from '@/entities/Park';
-import { Ride } from '@/entities/Ride';
+import Ride from '@/entities/Ride';
 import { GameState, BuildTool, Position } from '@/types';
 import { EventManager } from '@/utils/EventManager';
 
@@ -46,7 +46,7 @@ export class Engine {
 
   private setupEventListeners(): void {
     // Mouse click handling for building
-    this.renderer.domElement.addEventListener('click', (event) => {
+    this.renderer.domElement.addEventListener('click', (event: MouseEvent) => {
       if (this.gameState !== GameState.PLAYING) return;
       
       const position = this.getWorldPositionFromMouse(event);

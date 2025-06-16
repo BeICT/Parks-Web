@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Ride } from '@/entities/Ride';
+import Ride from '@/entities/Ride';
 import { Visitor } from '@/entities/Visitor';
 import { Position } from '@/types';
 

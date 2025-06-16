@@ -1,5 +1,5 @@
 import { GameStats, Position } from '@/types';
-import { Ride } from './Ride';
+import Ride from './Ride';
 import { Visitor } from './Visitor';
 
 export class Park {
