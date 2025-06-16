@@ -1,0 +1,231 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    overflow: hidden; /* Prevents scrollbars if content is too large */
+}
+
+#loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 2em;
+    z-index: 1000; /* Ensure it's on top */
+}
+
+
+#main-menu-panel {
+    background-color: #2c3e50; /* Dark blue-grey */
+    padding: 30px 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    width: 100%;
+    max-width: 400px;
+    box-sizing: border-box;
+}
+
+#main-menu-panel h1 {
+    font-size: 2.5em;
+    color: #ecf0f1; /* Light grey */
+    margin-bottom: 10px;
+}
+
+#main-menu-panel p {
+    font-size: 1em;
+    color: #bdc3c7; /* Lighter grey */
+    margin-bottom: 30px;
+}
+
+#main-menu-panel button {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1em;
+    color: #fff;
+    background: linear-gradient(145deg, #8e44ad, #9b59b6); /* Purple gradient */
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+#main-menu-panel button:last-of-type {
+    margin-bottom: 0; /* Remove margin for the last button before settings panel */
+}
+
+
+#main-menu-panel button:hover {
+    background: linear-gradient(145deg, #9b59b6, #8e44ad); /* Slightly darker purple */
+    transform: translateY(-2px);
+}
+
+#main-menu-panel button:active {
+    transform: translateY(0px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Settings Panel Styling (within main menu) */
+#settings-panel {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #34495e; /* Separator line */
+}
+
+#settings-panel h2 {
+    font-size: 1.8em;
+    color: #ecf0f1;
+    margin-bottom: 15px;
+}
+
+#settings-panel label {
+    display: block;
+    margin-bottom: 5px;
+    color: #bdc3c7;
+    text-align: left;
+}
+
+#settings-panel input[type="range"],
+#settings-panel select {
+    width: calc(100% - 20px); /* Adjust width to account for padding/border */
+    padding: 8px 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    border: 1px solid #34495e;
+    background-color: #3b5168;
+    color: #ecf0f1;
+    box-sizing: border-box;
+}
+#settings-panel input[type="range"] {
+    padding: 0; /* Range inputs often don't need vertical padding */
+}
+
+
+#settings-panel button {
+    background: linear-gradient(145deg, #16a085, #1abc9c); /* Teal gradient for save/close */
+    margin-top: 5px; /* Add some space above buttons in settings */
+}
+
+#settings-panel button:hover {
+    background: linear-gradient(145deg, #1abc9c, #16a085);
+}
+
+
+.hidden {
+    display: none !important;
+}
+
+/* Game UI specific styles - can be expanded */
+#game-container {
+    width: 100vw;
+    height: 100vh;
+    position: relative; /* For positioning game-ui over canvas */
+}
+
+#renderCanvas {
+    width: 100%;
+    height: 100%;
+    display: block; /* Remove extra space below canvas */
+}
+
+#game-ui {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Allow interaction with canvas unless an element has its own pointer-events */
+    color: white;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+#stats-panel, #controls-panel, #build-tools, #message-display {
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    pointer-events: all; /* Enable interaction for these panels */
+}
+
+#stats-panel {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+}
+
+#controls-panel {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    display: flex;
+    flex-direction: column;
+}
+#controls-panel button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    margin-top: 5px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+#controls-panel button:hover {
+    background-color: #2980b9;
+}
+
+
+#build-tools {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 200px; /* Example width */
+}
+#build-tools h4 {
+    margin-top: 0;
+}
+#build-tools button {
+    display: block;
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 5px;
+    background-color: #e67e22;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+#build-tools button:hover {
+    background-color: #d35400;
+}
+
+
+#message-display {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background-color: rgba(44, 62, 80, 0.9); /* Darker, more opaque */
+    color: #ecf0f1;
+    padding: 12px 18px;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    max-width: 300px;
+    font-size: 0.95em;
+}

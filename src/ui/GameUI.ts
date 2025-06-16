@@ -8,16 +8,12 @@ export class GameUI {
 
   constructor(eventManager: EventManager) {
     this.eventManager = eventManager;
-    this.initializeElements();
-    this.setupEventListeners();
-  }
 
-  private initializeElements(): void {
-    // Stats elements
     this.elements.statsPanel = document.getElementById('stats-panel')!;
     this.elements.money = document.getElementById('money')!;
     this.elements.visitors = document.getElementById('visitors')!;
     this.elements.happiness = document.getElementById('happiness')!;
+    this.elements.reputation = document.getElementById('reputation')!; // Added
     
     // Tools panel
     this.elements.toolsPanel = document.getElementById('tools-panel')!;
@@ -85,6 +81,9 @@ export class GameUI {
     if (this.elements.happiness) {
       this.elements.happiness.textContent = `${Math.round(stats.happiness)}%`;
     }
+    if (this.elements.reputation) { // Added
+      this.elements.reputation.textContent = `${Math.round(stats.reputation)}`; // Added
+    }
   }
 
   public show(): void {
@@ -115,7 +114,7 @@ export class GameUI {
     this.elements.controlsPanel.classList.remove('fade-in');
   }
 
-  public showMessage(message: string): void {
+  public showMessage(message: string, duration: number = 3000): void {
     // Create a temporary message element
     const messageElement = document.createElement('div');
     messageElement.textContent = message;
@@ -169,7 +168,7 @@ export class GameUI {
 
     document.body.appendChild(messageElement);
 
-    // Remove after 3 seconds with fade out
+    // Remove after specified duration with fade out
     setTimeout(() => {
       messageElement.style.animation = 'messageSlideOut 0.3s ease-out';
       setTimeout(() => {
@@ -177,7 +176,7 @@ export class GameUI {
           document.body.removeChild(messageElement);
         }
       }, 300);
-    }, 3000);
+    }, duration);
   }
 
   public showBuildMenu(tool: BuildTool): void {
