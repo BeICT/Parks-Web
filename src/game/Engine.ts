@@ -7,6 +7,7 @@ import { Park } from '../entities/Park';
 import Ride from '../entities/Ride';
 import { GameManager } from './GameManager';
 import { BuildManager } from './BuildManager';
+import { WeatherManager, MarketingManager } from './WeatherManager';
 import { GameStats, BuildTool } from '../types';
 
 export class Engine {
@@ -18,6 +19,8 @@ export class Engine {
   private park: Park;
   private gameManager: GameManager;
   private buildManager: BuildManager;
+  private weatherManager: WeatherManager;
+  private marketingManager: MarketingManager;
   private animationId: number | null = null;
   private lastTime: number = 0;
   private isPaused: boolean = false;
@@ -69,6 +72,10 @@ export class Engine {
     
     // Initialize build manager
     this.buildManager = new BuildManager(this.eventManager, this.park, this.park.size);
+    
+    // Initialize weather and marketing managers
+    this.weatherManager = new WeatherManager(this.eventManager, this.park);
+    this.marketingManager = new MarketingManager(this.eventManager, this.park);
 
     // Setup controls
     this.setupControls();
@@ -288,6 +295,12 @@ export class Engine {
 
     // Update park simulation
     this.park.update(deltaTime);
+    
+    // Update weather system
+    this.weatherManager.update(deltaTime);
+    
+    // Update marketing campaigns
+    this.marketingManager.update(deltaTime);
 
     // Update scene
     this.scene.update(deltaTime);
@@ -519,5 +532,29 @@ export class Engine {
     };
     
     return `${randomName} ${typeMap[staffType] || ''}`;
+  }
+
+  public getWeatherInfo(): any {
+    return this.weatherManager.getCurrentWeather();
+  }
+
+  public getWeatherForecast(): any {
+    return this.weatherManager.getWeatherForecast();
+  }
+
+  public getActiveCampaigns(): any {
+    return this.marketingManager.getActiveCampaigns();
+  }
+
+  public getAvailableCampaigns(): any {
+    return this.marketingManager.getAvailableCampaigns();
+  }
+
+  public startMarketingCampaign(campaignData: any): boolean {
+    return this.marketingManager.startCampaign(campaignData);
+  }
+
+  public forceWeatherChange(weatherType: string): void {
+    this.weatherManager.forceWeatherChange(weatherType);
   }
 }
