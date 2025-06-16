@@ -6,36 +6,58 @@ interface EventListeners {
     [eventName: string]: EventCallback[];
 }
 
-export default class EventManager {
-    private listeners: EventListeners = {};
+export class EventManager {
+  private events: { [key: string]: Function[] } = {};
 
-    public on<E extends EventName>(eventName: E, callback: (payload: Extract<GameEvent, { type: E }>['payload']) => void): void {
-        if (!this.listeners[eventName]) {
-            this.listeners[eventName] = [];
-        }
-        this.listeners[eventName].push(callback as EventCallback);
+  public on<E extends EventName>(eventName: E, callback: (payload: Extract<GameEvent, { type: E }>['payload']) => void): void {
+    if (!this.events[eventName]) {
+      this.events[eventName] = [];
     }
+    this.events[eventName].push(callback as EventCallback);
+  }
 
-    public off<E extends EventName>(eventName: E, callback: (payload: Extract<GameEvent, { type: E }>['payload']) => void): void {
-        if (!this.listeners[eventName]) {
-            return;
-        }
-        this.listeners[eventName] = this.listeners[eventName].filter(
-            (listener) => listener !== callback
-        );
+  public off<E extends EventName>(eventName: E, callback: (payload: Extract<GameEvent, { type: E }>['payload']) => void): void {
+    if (!this.events[eventName]) {
+      return;
     }
+    this.events[eventName] = this.events[eventName].filter(
+      (listener) => listener !== callback
+    );
+  }
 
-    public emit<E extends EventName>(eventName: E, payload?: Extract<GameEvent, { type: E }>['payload']): void {
-        if (!this.listeners[eventName]) {
-            return;
-        }
-        // console.log(`Emitting event: ${eventName}`, payload);
-        this.listeners[eventName].forEach((callback) => {
-            try {
-                callback(payload);
-            } catch (error) {
-                console.error(`Error in event listener for ${eventName}:`, error);
-            }
-        });
+  public emit<E extends EventName>(eventName: E, payload?: Extract<GameEvent, { type: E }>['payload']): void {
+    if (!this.events[eventName]) {
+      return;
     }
+    // console.log(`Emitting event: ${eventName}`, payload);
+    this.events[eventName].forEach((callback) => {
+      try {
+        callback(payload);
+      } catch (error) {
+        console.error(`Error in event listener for ${eventName}:`, error);
+      }
+    });
+  }
+
+  public once(event: string, callback: Function): void {
+    const onceCallback = (...args: any[]) => {
+      callback(...args);
+      this.off(event, onceCallback);
+    };
+    this.on(event, onceCallback);
+  }
+
+  public removeAllListeners(event?: string): void {
+    if (event) {
+      delete this.events[event];
+    } else {
+      this.events = {};
+    }
+  }
+
+  public listenerCount(event: string): number {
+    return this.events[event] ? this.events[event].length : 0;
+  }
 }
+
+export default EventManager;

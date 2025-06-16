@@ -31,49 +31,44 @@ export interface GameStats {
   reputation: number;
 }
 
-export interface RideCost {
+export interface BuildingCost {
   money: number;
-  maintenance: number; // Per minute or per tick, define consistently
-}
-
-export interface RideStats {
-  excitement: number;
-  intensity: number;
-  nausea: number;
+  maintenance: number;
 }
 
 export interface RideConfig {
   id: string;
   name: string;
-  assetId: string; // ID of the 3D model/asset to use
-  cost: RideCost;
-  stats: RideStats;
-  capacity?: number; // Optional: Max number of visitors per ride cycle
-  ticketPrice?: number; // Optional: Cost for a visitor to use the ride
-  // footprint: { width: number; depth: number }; // For placement logic
-  // entryPoint: Position; // Relative to ride origin
-  // exitPoint: Position; // Relative to ride origin
+  type: string;
+  capacity: number;
+  cost: BuildingCost;
+  excitement: number;
+  intensity: number;
+  nausea: number;
 }
 
-export enum AssetType {
-  MODEL = 'model',
-  TEXTURE = 'texture',
-  SOUND = 'sound',
-  // Add other types as needed
-}
-
-export interface AssetConfig {
-  id: string;
-  path: string;
-  type: AssetType;
-  rideDetails?: RideConfig; // Optional: If this asset is a ride, include its config
-}
-
-export interface VisitorNeeds {
+export interface VisitorNeed {
   hunger: number;
   thirst: number;
+  toilet: number;
+  fun: number;
   energy: number;
-  bathroom: number;
+}
+
+export enum GameState {
+  MENU = 'menu',
+  LOADING = 'loading',
+  PLAYING = 'playing',
+  PAUSED = 'paused'
+}
+
+export enum BuildTool {
+  NONE = 'none',
+  RIDE = 'ride',
+  SHOP = 'shop',
+  PATH = 'path',
+  DECORATION = 'decoration',
+  DELETE = 'delete'
 }
 
 // Event types (example, can be expanded)
@@ -94,3 +89,23 @@ export type GameEvent =
   | { type: 'showMessage', payload: { message: string, duration?: number } };
 
 export type EventCallback = (data?: any) => void;
+
+export enum AssetType {
+  MODEL = 'model',
+  TEXTURE = 'texture',
+  SOUND = 'sound',
+  // Add other types as needed
+}
+
+export interface AssetConfig {
+  id: string;
+  path: string;
+  type: AssetType;
+  rideDetails?: RideConfig; // Optional: If this asset is a ride, include its config
+}
+
+export interface LoadableAsset {
+  id: string;
+  type: 'texture' | 'model' | 'audio';
+  url: string;
+}

@@ -1,4 +1,4 @@
-import { Position, VisitorNeed } from '@/types';
+import { Position, VisitorNeed } from '../types';
 
 export class Visitor {
   public id: string;
@@ -11,13 +11,13 @@ export class Visitor {
   public currentRide: string | null = null;
   public isInPark: boolean = true;
   public visitTime: number = 0;
-  private speed: number = 2; // units per second
+  private speed: number = 2;
 
   constructor(id: string) {
     this.id = id;
     this.name = this.generateRandomName();
     this.position = { x: 0, y: 0, z: 0 };
-    this.money = Math.random() * 100 + 50; // $50-$150
+    this.money = Math.random() * 100 + 50;
     this.needs = {
       hunger: 100,
       thirst: 100,
@@ -39,23 +39,14 @@ export class Visitor {
 
   public update(deltaTime: number): void {
     this.visitTime += deltaTime;
-    
-    // Update needs over time
     this.updateNeeds(deltaTime);
-    
-    // Update happiness based on needs
     this.updateHappiness();
-    
-    // Move towards target if we have one
     this.updateMovement(deltaTime);
-    
-    // Decide what to do next
     this.updateBehavior();
   }
 
   private updateNeeds(deltaTime: number): void {
-    // Needs decrease over time
-    const needDecay = deltaTime / 60; // per minute
+    const needDecay = deltaTime / 60;
     
     this.needs.hunger = Math.max(0, this.needs.hunger - needDecay * 0.5);
     this.needs.thirst = Math.max(0, this.needs.thirst - needDecay * 0.8);
@@ -64,7 +55,6 @@ export class Visitor {
   }
 
   private updateHappiness(): void {
-    // Calculate happiness based on needs fulfillment
     const needsAverage = (
       this.needs.hunger + 
       this.needs.thirst + 
@@ -73,10 +63,8 @@ export class Visitor {
     ) / 4;
     
     const funBonus = Math.min(20, this.needs.fun);
-    
     this.happiness = Math.max(0, Math.min(100, needsAverage + funBonus));
     
-    // If happiness is too low, visitor might leave
     if (this.happiness < 20 && Math.random() < 0.01) {
       this.isInPark = false;
     }
@@ -90,11 +78,9 @@ export class Visitor {
     const distance = Math.sqrt(dx * dx + dz * dz);
     
     if (distance < 1) {
-      // Reached target
       this.position = { ...this.targetPosition };
       this.targetPosition = null;
     } else {
-      // Move towards target
       const moveDistance = this.speed * deltaTime;
       const ratio = Math.min(moveDistance / distance, 1);
       
@@ -106,7 +92,6 @@ export class Visitor {
   private updateBehavior(): void {
     if (this.targetPosition || this.currentRide) return;
     
-    // Simple AI: choose next action based on needs
     const urgentNeed = this.getMostUrgentNeed();
     
     switch (urgentNeed) {
@@ -137,7 +122,6 @@ export class Visitor {
   }
 
   private seekRide(): void {
-    // Find a random ride location (simplified)
     this.targetPosition = {
       x: Math.random() * 80 + 10,
       y: 0,
@@ -146,7 +130,6 @@ export class Visitor {
   }
 
   private seekFood(): void {
-    // Find food shop (simplified)
     this.targetPosition = {
       x: Math.random() * 80 + 10,
       y: 0,
@@ -155,7 +138,6 @@ export class Visitor {
   }
 
   private seekDrink(): void {
-    // Find drink shop (simplified)
     this.targetPosition = {
       x: Math.random() * 80 + 10,
       y: 0,
@@ -164,7 +146,6 @@ export class Visitor {
   }
 
   private seekToilet(): void {
-    // Find toilet (simplified)
     this.targetPosition = {
       x: Math.random() * 80 + 10,
       y: 0,
@@ -173,7 +154,6 @@ export class Visitor {
   }
 
   private wander(): void {
-    // Random wandering
     this.targetPosition = {
       x: Math.random() * 80 + 10,
       y: 0,

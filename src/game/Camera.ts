@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import * as BABYLON from 'babylonjs';
 
 export class Camera {
   private camera: THREE.PerspectiveCamera;
@@ -130,60 +129,4 @@ export class Camera {
     this.target.copy(position);
     this.updateCameraPosition();
   }
-}
-
-export class CameraManager {
-    private scene: BABYLON.Scene;
-    private canvas: HTMLCanvasElement;
-    public camera: BABYLON.ArcRotateCamera;
-
-    constructor(scene: BABYLON.Scene, canvas: HTMLCanvasElement) {
-        this.scene = scene;
-        this.canvas = canvas;
-        this.camera = this.createCamera();
-    }
-
-    private createCamera(): BABYLON.ArcRotateCamera {
-        // Create an ArcRotateCamera
-        const camera = new BABYLON.ArcRotateCamera(
-            "arcRotateCamera",
-            -Math.PI / 2, // Alpha (rotation around Y axis)
-            Math.PI / 3,  // Beta (rotation around X axis)
-            50,           // Radius (distance from target)
-            new BABYLON.Vector3(0, 0, 0), // Target position
-            this.scene
-        );
-
-        // Attach camera controls to the canvas
-        camera.attachControl(this.canvas, true);
-
-        // Set some camera limits
-        camera.lowerRadiusLimit = 10;
-        camera.upperRadiusLimit = 150;
-        camera.wheelPrecision = 15; // Zoom speed
-
-        // Panning (middle mouse button or Ctrl + Left Click)
-        camera.panningSensibility = 1000; // Lower is more sensitive for panning
-        camera.useAutoRotationBehavior = false; // Disable auto-rotation
-
-        return camera;
-    }
-
-    public getCamera(): BABYLON.ArcRotateCamera {
-        return this.camera;
-    }
-
-    public setTarget(target: BABYLON.Vector3): void {
-        this.camera.setTarget(target);
-    }
-
-    public update(): void {
-        // Any camera-specific update logic can go here
-        // For example, smoothly following a target, if not handled by behaviors
-    }
-
-    public dispose(): void {
-        this.camera.detachControl();
-        this.camera.dispose();
-    }
 }
