@@ -90,9 +90,14 @@ export type GameEvent =
   | { type: 'start-new-game' }
   | { type: 'load-game' }
   | { type: 'settings' }
-  | { type: 'game-pause' }
+  | { type: 'game-pause', payload?: boolean }
+  | { type: 'game-speed', payload: number }
   | { type: 'tool-selected', payload: BuildTool }
-  | { type: 'terrain-click', payload: { position: Position; object?: any } };
+  | { type: 'terrain-click', payload: { position: Position; object?: any } }
+  | { type: 'camera-zoom', payload: { direction: string } }
+  | { type: 'camera-rotate' }
+  | { type: 'open-window', payload: { type: string } }
+  | { type: 'game-date-changed', payload: string };
 
 export type EventCallback = (data?: any) => void;
 
