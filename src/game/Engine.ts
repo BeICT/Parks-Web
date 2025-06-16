@@ -202,17 +202,14 @@ export class Engine {
     }
     
     // Check if player has enough money
-    if (this.park.money < ride.cost.money) {
-      this.eventManager.emit('message-show', {
-        title: 'Insufficient Funds',
-        message: `You need $${ride.cost.money} to build ${ride.name}. You have $${this.park.money}.`,
-        type: 'error'
-      });
+    if (this.park.stats.money < ride.cost.money) {
+      // Simple alert for now - in a real game you'd show a proper notification
+      alert(`You need $${ride.cost.money} to build ${ride.name}. You have $${this.park.stats.money}.`);
       return;
     }
     
     // Deduct cost and add ride
-    this.park.spendMoney(ride.cost.money);
+    this.park.stats.money -= ride.cost.money;
     this.park.addRide(ride);
     
     // Create and add the 3D mesh
@@ -223,12 +220,8 @@ export class Engine {
     
     this.scene.addObject(rideMesh);
     
-    // Show success message
-    this.eventManager.emit('message-show', {
-      title: 'Ride Built!',
-      message: `${ride.name} has been built for $${ride.cost.money}!`,
-      type: 'success'
-    });
+    // Simple success message
+    alert(`${ride.name} has been built for $${ride.cost.money}!`);
     
     console.log('Ride built successfully!');
   }
