@@ -11,21 +11,29 @@ export class Scene {
   }
 
   public async initialize(): Promise<void> {
+    console.log('Initializing Scene...');
     this.scene.background = new THREE.Color(0x87CEEB);
     this.scene.fog = new THREE.Fog(0x87CEEB, 50, 200);
 
     this.setupLighting();
+    console.log('Lighting setup complete');
+    
     this.createTerrain();
+    console.log('Terrain created');
+    
     this.addBasicScenery();
+    console.log('Basic scenery added');
 
-    console.log('Scene initialized');
+    console.log('Scene initialized with', this.scene.children.length, 'objects');
+    console.log('Scene children:', this.scene.children.map(child => child.name || child.type));
   }
 
   private setupLighting(): void {
-    const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+    // Increase ambient light to make everything more visible
+    const ambientLight = new THREE.AmbientLight(0x404040, 1.0);
     this.scene.add(ambientLight);
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
     directionalLight.position.set(50, 100, 50);
     directionalLight.castShadow = true;
     
@@ -39,22 +47,27 @@ export class Scene {
     directionalLight.shadow.camera.bottom = -50;
 
     this.scene.add(directionalLight);
+    
+    console.log('Lighting setup - Ambient:', ambientLight.intensity, 'Directional:', directionalLight.intensity);
   }
 
   private createTerrain(): void {
     const groundGeometry = new THREE.PlaneGeometry(200, 200, 50, 50);
     
+    // Start with a simple bright green color first, then add texture if available
+    const groundMaterial = new THREE.MeshLambertMaterial({ 
+      color: 0x228B22 // Bright green
+    });
+    
     const grassTexture = this.assetLoader.getAsset('grass-texture');
+    console.log('Retrieved grass texture:', grassTexture);
+    
     if (grassTexture && grassTexture instanceof THREE.Texture) {
       grassTexture.wrapS = THREE.RepeatWrapping;
       grassTexture.wrapT = THREE.RepeatWrapping;
       grassTexture.repeat.set(20, 20);
+      groundMaterial.map = grassTexture;
     }
-
-    const groundMaterial = new THREE.MeshLambertMaterial({ 
-      color: 0x4a7c59,
-      map: grassTexture
-    });
     
     const ground = new THREE.Mesh(groundGeometry, groundMaterial);
     ground.rotation.x = -Math.PI / 2;
@@ -62,11 +75,44 @@ export class Scene {
     ground.name = 'terrain';
     
     this.scene.add(ground);
+    console.log('Terrain added to scene at position:', ground.position);
   }
 
   private addBasicScenery(): void {
     this.addTrees();
     this.addParkEntrance();
+    this.addTestCube();
+  }
+
+  private addTestCube(): void {
+    // Add a bright red cube in the center for testing visibility
+    const cubeGeometry = new THREE.BoxGeometry(5, 5, 5);
+    const cubeMaterial = new THREE.MeshLambertMaterial({ color: 0xff0000 });
+    const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+    cube.position.set(0, 2.5, 0);
+    cube.castShadow = true;
+    cube.name = 'test_cube';
+    this.scene.add(cube);
+    console.log('Added test cube at position:', cube.position);
+    
+    // Add a wireframe cube to help with debugging
+    const wireframeCube = new THREE.Mesh(
+      new THREE.BoxGeometry(10, 10, 10),
+      new THREE.MeshBasicMaterial({ 
+        color: 0x00ff00, 
+        wireframe: true 
+      })
+    );
+    wireframeCube.position.set(10, 5, 10);
+    wireframeCube.name = 'wireframe_cube';
+    this.scene.add(wireframeCube);
+    console.log('Added wireframe cube at position:', wireframeCube.position);
+    
+    // Add grid helper
+    const gridHelper = new THREE.GridHelper(100, 50);
+    gridHelper.name = 'grid_helper';
+    this.scene.add(gridHelper);
+    console.log('Added grid helper');
   }
 
   private addTrees(): void {

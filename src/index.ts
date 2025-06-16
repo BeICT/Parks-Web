@@ -72,23 +72,35 @@ class Game {
       return; 
     }
     
-    // Initialize the engine (which sets up BabylonJS scene, camera, etc.)
+    // Initialize the engine (which sets up Three.js scene, camera, etc.)
     // Ensure canvas exists and is visible if Engine expects it
     const canvas = document.getElementById('renderCanvas') as HTMLCanvasElement;
     if (!canvas) {
         console.error("Render canvas not found!");
         return;
     }
+    
+    console.log('Canvas found:', canvas);
+    console.log('Canvas parent:', canvas.parentElement);
+    console.log('Canvas dimensions before engine init:', canvas.clientWidth, 'x', canvas.clientHeight);
+    
     this.engine = new Engine(canvas, this.assetLoader, this.eventManager);
     
     try {
-        await this.engine.initialize(); // Initialize BabylonJS, scene, etc.
+        await this.engine.initialize(); // Initialize Three.js, scene, etc.
         // console.log("Engine initialized.");
     } catch (error) {
         console.error("Failed to initialize engine:", error);
         // Handle engine initialization failure
         return;
     }
+
+    // Set up window resize handler
+    window.addEventListener('resize', () => {
+      if (this.engine) {
+        this.engine.handleResize();
+      }
+    });
 
     this.menu.hideLoadingScreen();
     this.menu.showMainMenu();
@@ -103,6 +115,11 @@ class Game {
     if (gameContainer) {
         gameContainer.classList.remove('hidden');
     }
+
+    // Force canvas resize after making it visible
+    setTimeout(() => {
+      this.engine.handleResize();
+    }, 100);
 
     this.park = new Park('My Awesome Theme Park');
     this.engine.setPark(this.park); // Let the engine know about the park

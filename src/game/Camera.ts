@@ -4,23 +4,32 @@ export class Camera {
   private camera: THREE.PerspectiveCamera;
   private container: HTMLElement;
   private target: THREE.Vector3 = new THREE.Vector3(0, 0, 0);
-  private distance: number = 50;
-  private height: number = 30;
-  private angle: number = 0;
+  private distance: number = 60;
+  private height: number = 40;
+  private angle: number = Math.PI / 4; // Start at a 45-degree angle
   private moveSpeed: number = 20;
   private rotateSpeed: number = 1;
 
   constructor(container: HTMLElement) {
     this.container = container;
+    
+    const width = Math.max(container.clientWidth, 800);
+    const height = Math.max(container.clientHeight, 600);
+    
     this.camera = new THREE.PerspectiveCamera(
       75,
-      container.clientWidth / container.clientHeight,
+      width / height,
       0.1,
       1000
     );
     
+    console.log('Camera initialized with container dimensions:', width, 'x', height);
+    
     this.updateCameraPosition();
     this.setupMouseControls();
+    
+    console.log('Camera position:', this.camera.position);
+    console.log('Camera looking at:', this.target);
   }
 
   private updateCameraPosition(): void {
@@ -29,6 +38,8 @@ export class Camera {
     
     this.camera.position.set(x, this.height, z);
     this.camera.lookAt(this.target);
+    
+    console.log('Camera updated - Position:', this.camera.position, 'Target:', this.target);
   }
 
   private setupMouseControls(): void {
@@ -117,8 +128,13 @@ export class Camera {
   }
 
   public handleResize(): void {
-    this.camera.aspect = this.container.clientWidth / this.container.clientHeight;
+    const width = Math.max(this.container.clientWidth, 800);
+    const height = Math.max(this.container.clientHeight, 600);
+    
+    this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
+    
+    console.log('Camera resized to aspect ratio:', this.camera.aspect);
   }
 
   public getCamera(): THREE.PerspectiveCamera {

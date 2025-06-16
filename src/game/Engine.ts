@@ -26,19 +26,25 @@ export class Engine {
     console.log('Canvas dimensions:', canvas.clientWidth, 'x', canvas.clientHeight);
     console.log('Canvas parent:', canvas.parentElement);
     
+    // Ensure canvas has a minimum size
+    const width = Math.max(canvas.clientWidth, 800);
+    const height = Math.max(canvas.clientHeight, 600);
+    
+    console.log('Using dimensions:', width, 'x', height);
+    
     // Initialize renderer
     this.renderer = new THREE.WebGLRenderer({ 
       canvas: canvas,
       antialias: true,
       alpha: true
     });
-    this.renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+    this.renderer.setSize(width, height);
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setClearColor(0x87CEEB, 1);
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-    console.log('Renderer initialized with size:', canvas.clientWidth, 'x', canvas.clientHeight);
+    console.log('Renderer initialized with size:', width, 'x', height);
 
     // Initialize camera
     this.camera = new Camera(canvas.parentElement || document.body);
@@ -153,10 +159,18 @@ export class Engine {
       const width = container.clientWidth;
       const height = container.clientHeight;
       
-      this.renderer.setSize(width, height);
-      this.camera.handleResize();
+      console.log('Resizing canvas to:', width, 'x', height);
       
-      console.log(`Resized to ${width}x${height}`);
+      if (width > 0 && height > 0) {
+        this.renderer.setSize(width, height);
+        this.camera.handleResize();
+        
+        console.log(`Canvas resized to ${width}x${height}`);
+      } else {
+        console.warn('Container has no size:', width, 'x', height);
+      }
+    } else {
+      console.warn('Canvas has no parent container');
     }
   }
 
@@ -192,6 +206,13 @@ export class Engine {
 
   private render(): void {
     this.renderer.render(this.scene.getScene(), this.camera.getCamera());
+    
+    // Debug: Print frame info occasionally
+    if (Math.floor(this.lastTime / 5000) !== Math.floor((this.lastTime - 16) / 5000)) {
+      console.log('Rendering frame - Scene objects:', this.scene.getScene().children.length);
+      console.log('Camera position:', this.camera.getCamera().position);
+      console.log('Canvas size:', this.renderer.domElement.width, 'x', this.renderer.domElement.height);
+    }
   }
 
   private emitStatsUpdate(): void {
