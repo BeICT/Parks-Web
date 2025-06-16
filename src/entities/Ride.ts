@@ -1,4 +1,5 @@
 import { Position, BuildingCost, RideConfig } from '@/types';
+import * as THREE from 'three';
 
 export default class Ride {
   public id: string;
@@ -15,6 +16,7 @@ export default class Ride {
   public currentRiders: number = 0;
   public rideTime: number; // in seconds
   public currentTime: number = 0;
+  public mesh?: THREE.Object3D;
 
   constructor(config: RideConfig, position: Position) {
     this.id = config.id;
@@ -80,6 +82,26 @@ export default class Ride {
       this.currentRiders = 0;
       this.currentTime = 0;
     }
+  }
+
+  public setMesh(mesh: THREE.Object3D): void {
+    this.mesh = mesh;
+    this.mesh.position.copy(this.position);
+    this.mesh.rotation.copy(this.rotation);
+  }
+
+  // Added: Method to open the ride
+  public open(): void {
+    this.isOperating = true;
+    console.log(`${this.name} is now open!`);
+    // Potentially reset ride state, e.g., currentRiders if it makes sense
+  }
+
+  // Added: Method to close the ride
+  public close(): void {
+    this.isOperating = false;
+    this.currentRiders = 0; // Clear riders when closed
+    console.log(`${this.name} is now closed.`);
   }
 
   // Static factory methods for different ride types

@@ -1,192 +1,144 @@
 import { Engine } from './game/Engine';
 import { Menu } from './ui/Menu';
 import { GameUI } from './ui/GameUI';
-import { AssetLoader, LoadableAsset } from './utils/AssetLoader';
-import { EventManager } from './utils/EventManager';
-import { GameState } from './types';
+import EventManager from './utils/EventManager';
+import { AssetLoader } from './utils/AssetLoader';
+import { Park } from './entities/Park'; // Park might be managed by Engine or Game directly
 
 class Game {
-  private engine: Engine | null = null;
-  private menu: Menu;
-  private gameUI: GameUI;
-  private assetLoader: AssetLoader;
+  private engine!: Engine;
+  private menu!: Menu;
+  private gameUI!: GameUI;
   private eventManager: EventManager;
-  private currentState: GameState = GameState.MENU;
-  private loadingScreen: HTMLElement;
+  private assetLoader!: AssetLoader;
+  private park!: Park; // The main park instance
+
+  private loadedAssetCount: number = 0;
+  private totalAssets: number = 0;
 
   constructor() {
     this.eventManager = new EventManager();
-    this.assetLoader = new AssetLoader();
+    this.assetLoader = new AssetLoader(this.eventManager);
     this.menu = new Menu(this.eventManager);
-    this.gameUI = new GameUI(this.eventManager);
+    this.gameUI = new GameUI(this.eventManager); // GameUI might need EventManager too
+
+    // Define assets first
+    this.assetLoader.createDefaultAssets();
+    this.totalAssets = this.assetLoader.getAssetCount();
+    this.menu.setTotalAssets(this.totalAssets);
+
+    this.setupGlobalEventListeners();
+    this.initializeGameSystems();
+  }
+
+  private setupGlobalEventListeners(): void {
+    this.eventManager.on('startGame', this.startGame.bind(this));
+    this.eventManager.on('openSettings', () => this.menu.showSettings());
+    this.eventManager.on('closeSettings', () => this.menu.hideSettings());
+    this.eventManager.on('settingsSaved', (settings: any) => {
+      console.log('Settings saved:', settings);
+      // Apply settings, e.g., this.engine.applySettings(settings);
+      this.menu.hideSettings();
+    });
+    this.eventManager.on('returnToMainMenu', this.returnToMainMenu.bind(this));
+
+    this.eventManager.on('assetLoaded', (data: { id: string }) => {
+      this.loadedAssetCount++;
+      this.menu.updateLoadingProgress(this.loadedAssetCount);
+      // console.log(`Asset loaded: ${data.id}, Progress: ${this.loadedAssetCount}/${this.totalAssets}`);
+    });
     
-    this.loadingScreen = document.getElementById('loading-screen')!;
-    this.setupEventListeners();
-    this.initialize();
-  }
-
-  private setupEventListeners(): void {
-    this.eventManager.on('start-new-game', () => {
-      this.startGame();
-    });
-
-    this.eventManager.on('load-game', () => {
-      this.showMessage('Load game feature coming soon!');
-    });
-
-    this.eventManager.on('settings', () => {
-      this.showMessage('Settings panel coming soon!');
-    });
-
-    this.eventManager.on('game-pause', () => {
-      if (this.engine) {
-        this.engine.togglePause();
-      }
-    });
-
-    this.eventManager.on('tool-selected', (tool: string) => {
-      console.log(`Selected tool: ${tool}`);
-      this.showMessage(`${tool} tool selected`);
-    });
-
-    window.addEventListener('beforeunload', () => {
-      this.cleanup();
-    });
-
-    window.addEventListener('keydown', (event) => {
-      if (event.code === 'Escape' && this.currentState === GameState.PLAYING) {
-        this.showMainMenu();
-      }
-    });
-
-    window.addEventListener('resize', () => {
-      if (this.engine) {
-        this.engine.handleResize();
-      }
+    this.eventManager.on('allAssetsLoaded', () => {
+        console.log("All assets reported loaded via event.");
+        // This event can be used for further actions if needed,
+        // but await assetLoader.loadAssets() handles the primary sequence.
     });
   }
 
-  private async initialize(): Promise<void> {
+  private async initializeGameSystems(): Promise<void> {
+    this.menu.showLoadingScreen();
+
+    // Load assets
     try {
-      console.log('Initializing game...');
-      this.showLoading(true);
-      
-      this.assetLoader.createDefaultAssets();
-      await this.loadGameAssets();
-      
-      this.showLoading(false);
-      console.log('Game initialized successfully');
+      await this.assetLoader.loadAssets();
+      // console.log("Asset loading complete in initializeGameSystems.");
     } catch (error) {
-      console.error('Failed to initialize game:', error);
-      this.showLoading(false);
-      this.showError('Failed to initialize game. Please refresh the page.');
+      console.error("Failed to load assets during initialization:", error);
+      // Handle critical asset loading failure (e.g., show error message, stop game)
+      this.menu.updateLoadingProgress(this.loadedAssetCount); // Update with potentially partial load
+      // Potentially show an error on the loading screen or a dedicated error UI
+      return; 
     }
-  }
-
-  private async loadGameAssets(): Promise<void> {
-    const assetsToLoad: LoadableAsset[] = [];
-
-    if (assetsToLoad.length > 0) {
-      try {
-        await this.assetLoader.loadAssets(assetsToLoad);
-      } catch (error) {
-        console.warn('Some assets failed to load, using defaults:', error);
-      }
+    
+    // Initialize the engine (which sets up BabylonJS scene, camera, etc.)
+    // Ensure canvas exists and is visible if Engine expects it
+    const canvas = document.getElementById('renderCanvas') as HTMLCanvasElement;
+    if (!canvas) {
+        console.error("Render canvas not found!");
+        return;
     }
-
-    await new Promise(resolve => setTimeout(resolve, 500));
-  }
-
-  private async startGame(): Promise<void> {
+    this.engine = new Engine(canvas, this.assetLoader, this.eventManager);
+    
     try {
-      console.log('Starting new game...');
-      
-      this.showLoading(true);
-      this.currentState = GameState.LOADING;
-      this.menu.hide();
-      
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
-      if (!canvas) {
-        throw new Error('Game canvas not found');
-      }
-
-      this.engine = new Engine(canvas, this.assetLoader, this.eventManager);
-      await this.engine.initialize();
-      
-      this.gameUI.show();
-      this.showLoading(false);
-      this.currentState = GameState.PLAYING;
-      
-      console.log('🎢 Game started successfully! Use WASD to move camera, Q/E to rotate, mouse wheel to zoom');
+        await this.engine.initialize(); // Initialize BabylonJS, scene, etc.
+        // console.log("Engine initialized.");
     } catch (error) {
-      console.error('Failed to start game:', error);
-      this.showLoading(false);
-      this.showError('Failed to start game. Please try again.');
-      this.showMainMenu();
+        console.error("Failed to initialize engine:", error);
+        // Handle engine initialization failure
+        return;
     }
+
+    this.menu.hideLoadingScreen();
+    this.menu.showMainMenu();
   }
 
-  private showMainMenu(): void {
-    this.currentState = GameState.MENU;
-    if (this.engine) {
-      this.engine.dispose();
-      this.engine = null;
+  private startGame(): void {
+    console.log('Starting new game...');
+    this.menu.hideMainMenu();
+    
+    // Ensure game container and canvas are visible
+    const gameContainer = document.getElementById('game-container');
+    if (gameContainer) {
+        gameContainer.classList.remove('hidden');
     }
+
+    this.park = new Park('My Awesome Theme Park');
+    this.engine.setPark(this.park); // Let the engine know about the park
+
+    // Initialize GameUI with starting stats
+    this.gameUI.updateStats(this.park.stats);
+    this.gameUI.setAvailableRides(this.assetLoader.getAssetConfigs().filter(ac => ac.type === 'MODEL')); // Example
+    this.gameUI.show();
+
+    this.engine.start(); // Start the game loop
+    
+    // Example: Add an initial ride to the park for testing
+    // const ferrisWheelConfig = this.assetLoader.getAssetConfigs().find(ac => ac.id === 'ferrisWheelModel');
+    // if (ferrisWheelConfig && ferrisWheelConfig.rideDetails) {
+    //     const ride = new Ride(ferrisWheelConfig.rideDetails, new THREE.Vector3(10, 0, 10));
+    //     const rideMesh = this.assetLoader.getAsset(ferrisWheelConfig.id) as THREE.Object3D;
+    //     if (rideMesh) {
+    //         ride.setMesh(rideMesh.clone()); // Clone if you plan to have multiple instances
+    //         if (this.park.addRide(ride)) {
+    //             this.engine.addMeshToScene(ride.mesh!);
+    //             this.gameUI.updateStats(this.park.stats);
+    //         }
+    //     }
+    // }
+  }
+
+  private returnToMainMenu(): void {
+    this.engine.stop();
     this.gameUI.hide();
-    this.menu.show();
-  }
-
-  private showLoading(show: boolean): void {
-    if (show) {
-      this.loadingScreen.classList.remove('hidden');
-    } else {
-      this.loadingScreen.classList.add('hidden');
+    const gameContainer = document.getElementById('game-container');
+    if (gameContainer) {
+        gameContainer.classList.add('hidden');
     }
-  }
-
-  private showError(message: string): void {
-    this.gameUI.showMessage(`❌ ${message}`);
-  }
-
-  private showMessage(message: string): void {
-    this.gameUI.showMessage(message);
-  }
-
-  private cleanup(): void {
-    if (this.engine) {
-      this.engine.dispose();
-    }
-  }
-
-  public getCurrentState(): GameState {
-    return this.currentState;
-  }
-
-  public getEngine(): Engine | null {
-    return this.engine;
+    this.menu.showMainMenu();
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  try {
-    const game = new Game();
-    (window as any).game = game;
-    console.log('🎢 Park Tycoon initialized successfully!');
-    console.log('Click "New Game" to start building your theme park!');
-  } catch (error) {
-    console.error('Failed to initialize Park Tycoon:', error);
-  }
+// Initialize the game once the DOM is fully loaded
+window.addEventListener('DOMContentLoaded', () => {
+  new Game();
 });
-
-window.addEventListener('error', (event) => {
-  console.error('Uncaught error:', event.error);
-});
-
-window.addEventListener('unhandledrejection', (event) => {
-  console.error('Unhandled promise rejection:', event.reason);
-  event.preventDefault();
-});
-
-export { Game };
