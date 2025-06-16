@@ -1,5 +1,5 @@
 import { EventManager } from '../utils/EventManager';
-import { BuildTool, GameState } from '../types';
+import { BuildTool, GameStateInfo } from '../types';
 
 export class ToolbarUI {
   private eventManager: EventManager;
@@ -51,15 +51,15 @@ export class ToolbarUI {
     this.elements.fileOptionsBtn?.addEventListener('click', () => this.openFileOptions());
 
     // View Options
-    this.elements.zoomOutBtn?.addEventListener('click', () => this.eventManager.emit('camera-zoom', { direction: 'out' }));
-    this.elements.zoomInBtn?.addEventListener('click', () => this.eventManager.emit('camera-zoom', { direction: 'in' }));
-    this.elements.rotateViewBtn?.addEventListener('click', () => this.eventManager.emit('camera-rotate'));
+    this.elements.zoomOutBtn?.addEventListener('click', () => this.zoomOut());
+    this.elements.zoomInBtn?.addEventListener('click', () => this.zoomIn());
+    this.elements.rotateViewBtn?.addEventListener('click', () => this.rotateView());
     this.elements.viewOptionsBtn?.addEventListener('click', () => this.openViewOptions());
-    this.elements.mapBtn?.addEventListener('click', () => this.openMap());
+    this.elements.mapBtn?.addEventListener('click', () => this.toggleMap());
 
     // Construction Tools
     this.elements.clearSceneryBtn?.addEventListener('click', () => this.selectTool(BuildTool.DELETE));
-    this.elements.landToolBtn?.addEventListener('click', () => this.selectTool(BuildTool.DECORATION)); // Reusing as land tool
+    this.elements.landToolBtn?.addEventListener('click', () => this.selectTool(BuildTool.DECORATION));
     this.elements.waterToolBtn?.addEventListener('click', () => this.openWaterTool());
     this.elements.sceneryBtn?.addEventListener('click', () => this.openScenery());
     this.elements.footpathBtn?.addEventListener('click', () => this.selectTool(BuildTool.PATH));
@@ -70,12 +70,15 @@ export class ToolbarUI {
     this.elements.researchBtn?.addEventListener('click', () => this.openResearch());
     this.elements.ridesListBtn?.addEventListener('click', () => this.openRidesList());
     this.elements.parkWindowBtn?.addEventListener('click', () => this.openParkWindow());
-    this.elements.staffBtn?.addEventListener('click', () => this.openStaff());
-    this.elements.guestsBtn?.addEventListener('click', () => this.openGuests());
+    this.elements.staffBtn?.addEventListener('click', () => this.openStaffWindow());
+    this.elements.guestsBtn?.addEventListener('click', () => this.openGuestsWindow());    // Event listeners for game state changes
+    this.eventManager.on('gameStateChanged', (state: GameStateInfo) => {
+      this.updateUI(state);
+    });
 
-    // Listen for game events
-    this.eventManager.on('game-pause', () => this.updatePauseButton());
-    this.eventManager.on('tool-selected', (tool: BuildTool) => this.updateToolButtons(tool));
+    this.eventManager.on('toolChanged', (tool: BuildTool) => {
+      this.setActiveTool(tool);
+    });
   }
 
   private togglePause(): void {
@@ -94,6 +97,23 @@ export class ToolbarUI {
     this.currentTool = tool;
     this.eventManager.emit('tool-selected', tool);
     this.updateToolButtons(tool);
+  }
+
+  // Camera controls
+  private zoomOut(): void {
+    this.eventManager.emit('camera-zoom', { direction: 'out' });
+  }
+
+  private zoomIn(): void {
+    this.eventManager.emit('camera-zoom', { direction: 'in' });
+  }
+
+  private rotateView(): void {
+    this.eventManager.emit('camera-rotate');
+  }
+
+  private toggleMap(): void {
+    this.eventManager.emit('toggle-map');
   }
 
   private updatePauseButton(): void {
@@ -133,22 +153,32 @@ export class ToolbarUI {
         this.elements.newRidesBtn?.classList.add('active');
         break;
       case BuildTool.SHOP:
-        this.elements.sceneryBtn?.classList.add('active'); // Using scenery for shops temporarily
+        this.elements.sceneryBtn?.classList.add('active');
+        break;
+      case BuildTool.DECORATION:
+        this.elements.landToolBtn?.classList.add('active');
         break;
     }
   }
 
-  // Window opening methods (to be implemented with modal system)
+  private setActiveTool(tool: BuildTool): void {
+    this.currentTool = tool;
+    this.updateToolButtons(tool);
+  }
+  private updateUI(state: GameStateInfo): void {
+    this.isPaused = state.isPaused;
+    this.gameSpeed = state.gameSpeed;
+    this.updatePauseButton();
+    this.updateSpeedButton();
+  }
+
+  // Window opening methods
   private openFileOptions(): void {
     this.eventManager.emit('open-window', { type: 'file-options' });
   }
 
   private openViewOptions(): void {
     this.eventManager.emit('open-window', { type: 'view-options' });
-  }
-
-  private openMap(): void {
-    this.eventManager.emit('open-window', { type: 'map' });
   }
 
   private openWaterTool(): void {
@@ -175,11 +205,11 @@ export class ToolbarUI {
     this.eventManager.emit('open-window', { type: 'park-info' });
   }
 
-  private openStaff(): void {
+  private openStaffWindow(): void {
     this.eventManager.emit('open-window', { type: 'staff' });
   }
 
-  private openGuests(): void {
+  private openGuestsWindow(): void {
     this.eventManager.emit('open-window', { type: 'guests' });
   }
 
@@ -195,5 +225,9 @@ export class ToolbarUI {
     if (toolbar) {
       toolbar.style.display = 'none';
     }
+  }
+
+  public getCurrentTool(): BuildTool {
+    return this.currentTool;
   }
 }
