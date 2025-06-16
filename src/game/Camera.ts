@@ -1,33 +1,136 @@
+import * as THREE from 'three';
+
 export class Camera {
-    private position: THREE.Vector3;
-    private target: THREE.Vector3;
-    private camera: THREE.PerspectiveCamera;
+  private camera: THREE.PerspectiveCamera;
+  private container: HTMLElement;
+  private target: THREE.Vector3 = new THREE.Vector3(0, 0, 0);
+  private distance: number = 50;
+  private height: number = 30;
+  private angle: number = 0;
+  private moveSpeed: number = 20;
+  private rotateSpeed: number = 1;
+  private zoomSpeed: number = 10;
 
-    constructor(fov: number, aspect: number, near: number, far: number) {
-        this.position = new THREE.Vector3(0, 5, 10);
-        this.target = new THREE.Vector3(0, 0, 0);
-        this.camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-        this.camera.position.copy(this.position);
-        this.camera.lookAt(this.target);
-    }
+  constructor(container: HTMLElement) {
+    this.container = container;
+    this.camera = new THREE.PerspectiveCamera(
+      75,
+      container.clientWidth / container.clientHeight,
+      0.1,
+      1000
+    );
+    
+    this.updateCameraPosition();
+    this.setupMouseControls();
+  }
 
-    setPosition(x: number, y: number, z: number): void {
-        this.position.set(x, y, z);
-        this.camera.position.copy(this.position);
-    }
+  private updateCameraPosition(): void {
+    const x = this.target.x + Math.cos(this.angle) * this.distance;
+    const z = this.target.z + Math.sin(this.angle) * this.distance;
+    
+    this.camera.position.set(x, this.height, z);
+    this.camera.lookAt(this.target);
+  }
 
-    setTarget(x: number, y: number, z: number): void {
-        this.target.set(x, y, z);
-        this.camera.lookAt(this.target);
-    }
+  private setupMouseControls(): void {
+    let isDragging = false;
+    let lastMouseX = 0;
+    let lastMouseY = 0;
 
-    update(): void {
-        // Update camera logic if needed
-        this.camera.position.copy(this.position);
-        this.camera.lookAt(this.target);
-    }
+    this.container.addEventListener('mousedown', (event) => {
+      if (event.button === 2) { // Right mouse button
+        isDragging = true;
+        lastMouseX = event.clientX;
+        lastMouseY = event.clientY;
+        event.preventDefault();
+      }
+    });
 
-    getCamera(): THREE.PerspectiveCamera {
-        return this.camera;
-    }
+    this.container.addEventListener('mousemove', (event) => {
+      if (isDragging) {
+        const deltaX = event.clientX - lastMouseX;
+        const deltaY = event.clientY - lastMouseY;
+        
+        this.angle -= deltaX * 0.01;
+        this.height = Math.max(10, Math.min(100, this.height + deltaY * 0.1));
+        
+        this.updateCameraPosition();
+        
+        lastMouseX = event.clientX;
+        lastMouseY = event.clientY;
+      }
+    });
+
+    this.container.addEventListener('mouseup', () => {
+      isDragging = false;
+    });
+
+    // Disable context menu on right click
+    this.container.addEventListener('contextmenu', (event) => {
+      event.preventDefault();
+    });
+
+    // Mouse wheel for zoom
+    this.container.addEventListener('wheel', (event) => {
+      this.distance = Math.max(10, Math.min(100, this.distance + event.deltaY * 0.01));
+      this.updateCameraPosition();
+      event.preventDefault();
+    });
+  }
+
+  public setupMovementControls(keys: { [key: string]: boolean }): void {
+    // This will be called in the game loop to handle continuous movement
+    this.handleMovement = (deltaTime: number) => {
+      let moved = false;
+      
+      if (keys['KeyW'] || keys['ArrowUp']) {
+        this.target.z -= this.moveSpeed * deltaTime;
+        moved = true;
+      }
+      if (keys['KeyS'] || keys['ArrowDown']) {
+        this.target.z += this.moveSpeed * deltaTime;
+        moved = true;
+      }
+      if (keys['KeyA'] || keys['ArrowLeft']) {
+        this.target.x -= this.moveSpeed * deltaTime;
+        moved = true;
+      }
+      if (keys['KeyD'] || keys['ArrowRight']) {
+        this.target.x += this.moveSpeed * deltaTime;
+        moved = true;
+      }
+      if (keys['KeyQ']) {
+        this.angle -= this.rotateSpeed * deltaTime;
+        moved = true;
+      }
+      if (keys['KeyE']) {
+        this.angle += this.rotateSpeed * deltaTime;
+        moved = true;
+      }
+      
+      if (moved) {
+        this.updateCameraPosition();
+      }
+    };
+  }
+
+  private handleMovement: (deltaTime: number) => void = () => {};
+
+  public update(deltaTime: number): void {
+    this.handleMovement(deltaTime);
+  }
+
+  public handleResize(): void {
+    this.camera.aspect = this.container.clientWidth / this.container.clientHeight;
+    this.camera.updateProjectionMatrix();
+  }
+
+  public getCamera(): THREE.PerspectiveCamera {
+    return this.camera;
+  }
+
+  public focusOn(position: THREE.Vector3): void {
+    this.target.copy(position);
+    this.updateCameraPosition();
+  }
 }
