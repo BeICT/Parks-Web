@@ -376,3 +376,102 @@ body {
 #modal-container > * {
     pointer-events: auto;
 }
+
+/* Modal Window Styling */
+.modal-window {
+    font-family: 'MS Sans Serif', sans-serif;
+    font-size: 11px;
+    color: #000;
+    box-shadow: 4px 4px 8px rgba(0,0,0,0.4);
+}
+
+.modal-title-bar {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.modal-content {
+    font-family: 'MS Sans Serif', sans-serif;
+    font-size: 11px;
+    color: #000;
+}
+
+.modal-content h3 {
+    font-size: 12px;
+    font-weight: bold;
+    margin: 0 0 8px 0;
+    color: #000;
+}
+
+.modal-content h4 {
+    font-size: 11px;
+    font-weight: bold;
+    margin: 6px 0 4px 0;
+    color: #000;
+}
+
+/* Modal button styling */
+.modal-content button {
+    background: #c0c0c0;
+    border: 1px outset #c0c0c0;
+    padding: 2px 8px;
+    margin: 2px;
+    font-family: 'MS Sans Serif', sans-serif;
+    font-size: 11px;
+    cursor: pointer;
+    color: #000;
+}
+
+.modal-content button:hover {
+    background: #d0d0d0;
+}
+
+.modal-content button:active {
+    border: 1px inset #c0c0c0;
+}
+
+/* List items in modals */
+.modal-list-item {
+    padding: 4px;
+    margin: 1px 0;
+    background: #fff;
+    border: 1px solid #7f7f7f;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.modal-list-item:hover {
+    background: #316ac5;
+    color: #fff;
+}
+
+/* Progress bars in modals */
+.modal-progress-container {
+    background: #808080;
+    border: 1px inset #c0c0c0;
+    height: 16px;
+    margin: 4px 0;
+    padding: 1px;
+}
+
+.modal-progress-bar {
+    background: linear-gradient(to right, #00aa00, #66dd66);
+    height: 100%;
+    border: 1px solid #004400;
+}
+
+/* Panel styling for modals */
+.modal-panel {
+    border: 1px inset #c0c0c0;
+    background: #c0c0c0;
+    margin: 4px 0;
+    padding: 6px;
+}
+
+.modal-panel-title {
+    font-weight: bold;
+    margin-bottom: 4px;
+    color: #000;
+}

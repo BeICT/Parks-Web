@@ -101,7 +101,12 @@ export type GameEvent =
   | { type: 'game-date-changed', payload: string }
   | { type: 'gameStateChanged', payload: GameStateInfo }
   | { type: 'toolChanged', payload: BuildTool }
-  | { type: 'toggle-map' };
+  | { type: 'toggle-map' }
+  | { type: 'hire-staff', payload: { type: string, cost: string } }
+  | { type: 'fire-staff', payload: { staffId: string } }
+  | { type: 'staff-details', payload: any }
+  | { type: 'start-research', payload: any }
+  | { type: 'complete-research', payload: any };
 
 export type EventCallback = (data?: any) => void;
 
