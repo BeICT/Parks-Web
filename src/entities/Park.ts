@@ -199,4 +199,21 @@ export class Park {
     const minutes = this.gameDate.getMinutes().toString().padStart(2, '0');
     return `${hours}:${minutes}`;
   }
+
+  public getStats(): GameStats {
+    return { ...this.stats }; // Return a copy to prevent direct modification
+  }
+
+  public addStaffMember(staff: any): void {
+    // In a full implementation, this would add to a staff array
+    console.log('Adding staff member:', staff);
+    // For now, just adjust monthly costs
+    this.stats.money -= staff.salary; // First month's salary
+  }
+
+  public startResearch(researchData: any): void {
+    console.log('Starting research:', researchData);
+    // In a full implementation, this would add to active research
+    // For now, just log the action
+  }
 }
