@@ -49,7 +49,7 @@ class Game {
     });
   }
 
-  private async initialize(): void {
+  private async initialize(): Promise<void> {
     try {
       console.log('Initializing game...');
       

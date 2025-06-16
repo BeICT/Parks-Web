@@ -64,7 +64,7 @@ export class AssetLoader {
         resolve(texture);
       },
       undefined,
-      (error: ErrorEvent) => {
+      (error: unknown) => {
         console.warn(`Failed to load texture ${asset.id}, using fallback`);
         // Create a simple colored texture as fallback
         const canvas = document.createElement('canvas');
