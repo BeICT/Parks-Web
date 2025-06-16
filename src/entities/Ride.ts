@@ -106,16 +106,15 @@ export default class Ride {
   private calculateTicketPrice(): number {
     return Math.max(1, Math.round((this.excitement + this.intensity) / 2));
   }
-
   public breakdown(): void {
     this.isOperational = false;
     this.isOperating = false;
-    console.log(`${this.name} has broken down and needs maintenance!`);
+    // Ride breakdown - maintenance required
   }
 
   public repair(): void {
     this.isOperational = true;
-    console.log(`${this.name} has been repaired and is operational again.`);
+    // Ride repaired and operational again
   }
 
   private calculateRidersPerHour(): void {
@@ -147,16 +146,15 @@ export default class Ride {
     const randomFactor = Math.random() * 0.5 + 0.5;
     return Math.floor(this.capacity * baseAttraction * randomFactor);
   }
-
   public open(): void {
     this.isOperating = true;
-    console.log(`${this.name} is now open!`);
+    // Ride is now open for guests
   }
 
   public close(): void {
     this.isOperating = false;
     this.currentRiders = 0;
-    console.log(`${this.name} is now closed.`);
+    // Ride is now closed
   }
 
   public setMesh(mesh: THREE.Object3D): void {

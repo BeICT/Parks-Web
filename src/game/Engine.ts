@@ -161,8 +161,6 @@ export class Engine {
   }
 
   private buildRide(position: THREE.Vector3): void {
-    console.log('Building ride at:', position);
-    
     // Cycle through different ride types for variety
     const rideTypes = ['ferris_wheel', 'roller_coaster', 'carousel', 'bumper_cars', 'water_slide', 'haunted_house', 'drop_tower', 'spinning_teacups'];
     const randomType = rideTypes[Math.floor(Math.random() * rideTypes.length)];
@@ -222,8 +220,6 @@ export class Engine {
     
     // Simple success message
     alert(`${ride.name} has been built for $${ride.cost.money}!`);
-    
-    console.log('Ride built successfully!');
   }
 
   private buildShop(position: THREE.Vector3): void {
