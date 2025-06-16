@@ -285,6 +285,24 @@ export class Engine {
     this.eventManager.on('tool-selected', (tool: BuildTool) => {
       this.setCurrentTool(tool);
     });
+
+    // Staff management events
+    this.eventManager.on('hire-staff', (data: { type: string, cost: string }) => {
+      this.handleHireStaff(data.type, data.cost);
+    });
+
+    this.eventManager.on('fire-staff', (data: { staffId: string }) => {
+      this.handleFireStaff(data.staffId);
+    });
+
+    // Research events
+    this.eventManager.on('start-research', (researchData: any) => {
+      this.handleStartResearch(researchData);
+    });
+
+    this.eventManager.on('complete-research', (researchData: any) => {
+      this.handleCompleteResearch(researchData);
+    });
   }
 
   public start(): void {
@@ -465,4 +483,94 @@ export class Engine {
   private handleKeyUp = (event: KeyboardEvent): void => {
     this.keys[event.code] = false;
   };
+
+  // Staff management handlers
+  private handleHireStaff(staffType: string, cost: string): void {
+    console.log(`Hiring ${staffType} for ${cost}`);
+    
+    // Parse cost (remove $ and convert to number)
+    const costValue = parseInt(cost.replace('$', '').replace(',', ''));
+    
+    if (this.park.getStats().money >= costValue) {
+      // Deduct cost
+      const currentStats = this.park.getStats();
+      currentStats.money -= costValue;
+      
+      // Add staff member to park
+      this.park.addStaffMember({
+        id: Date.now().toString(),
+        type: staffType,
+        name: this.generateStaffName(staffType),
+        salary: Math.floor(costValue * 0.1), // 10% of hiring cost as monthly salary
+        efficiency: 75 + Math.random() * 20, // 75-95% efficiency
+        area: 'Unassigned'
+      });
+      
+      // Update UI
+      this.eventManager.emit('statsUpdated', currentStats);
+      this.eventManager.emit('showMessage', { message: `${staffType} hired successfully!`, duration: 3000 });
+      
+      console.log(`Successfully hired ${staffType}, remaining money: $${currentStats.money}`);
+    } else {
+      this.eventManager.emit('showMessage', { message: `Not enough money to hire ${staffType}!`, duration: 3000 });
+      console.log(`Insufficient funds to hire ${staffType}`);
+    }
+  }
+
+  private handleFireStaff(staffId: string): void {
+    console.log(`Firing staff member ${staffId}`);
+    // Implementation would remove staff from park
+    this.eventManager.emit('showMessage', { message: 'Staff member fired', duration: 2000 });
+  }
+
+  private handleStartResearch(researchData: any): void {
+    console.log('Starting research:', researchData);
+    
+    // Parse research cost
+    const costValue = parseInt(researchData.cost.replace('$', '').replace(',', ''));
+    
+    if (this.park.getStats().money >= costValue) {
+      const currentStats = this.park.getStats();
+      currentStats.money -= costValue;
+      
+      // Start research in park
+      this.park.startResearch(researchData);
+      
+      // Update UI
+      this.eventManager.emit('statsUpdated', currentStats);
+      this.eventManager.emit('showMessage', { 
+        message: `Research started: ${researchData.name}`, 
+        duration: 3000 
+      });
+      
+      console.log(`Research started: ${researchData.name}, remaining money: $${currentStats.money}`);
+    } else {
+      this.eventManager.emit('showMessage', { 
+        message: 'Not enough money for research!', 
+        duration: 3000 
+      });
+    }
+  }
+
+  private handleCompleteResearch(researchData: any): void {
+    console.log('Research completed:', researchData);
+    this.eventManager.emit('showMessage', { 
+      message: `Research completed: ${researchData.name}!`, 
+      duration: 4000 
+    });
+  }
+
+  private generateStaffName(staffType: string): string {
+    const names = ['Alex', 'Jamie', 'Sam', 'Taylor', 'Jordan', 'Casey', 'Morgan', 'Riley'];
+    const randomName = names[Math.floor(Math.random() * names.length)];
+    
+    const typeMap: { [key: string]: string } = {
+      'Handyman': 'the Handyman',
+      'Mechanic': 'the Mechanic', 
+      'Security': 'Security',
+      'Entertainer': 'the Entertainer'
+    };
+    
+    return `${randomName} ${typeMap[staffType] || ''}`;
+  }
 }
