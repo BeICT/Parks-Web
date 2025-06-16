@@ -12,6 +12,7 @@ class Game {
   private assetLoader: AssetLoader;
   private eventManager: EventManager;
   private currentState: GameState = GameState.MENU;
+  private loadingScreen: HTMLElement;
 
   constructor() {
     this.eventManager = new EventManager();
@@ -19,32 +20,58 @@ class Game {
     this.menu = new Menu(this.eventManager);
     this.gameUI = new GameUI(this.eventManager);
 
+    // FIX 1: Safely get the loading screen element
+    const loadingScreenEl = document.getElementById('loading-screen');
+    if (!loadingScreenEl) {
+      // Throw a clear error if the element is missing, preventing crashes later.
+      throw new Error('Fatal Error: The #loading-screen element was not found in the DOM.');
+    }
+    this.loadingScreen = loadingScreenEl;
+
     this.setupEventListeners();
     this.initialize();
   }
 
   private setupEventListeners(): void {
-    // Start new game
     this.eventManager.on('start-new-game', () => {
       this.startGame();
     });
 
-    // Game pause/unpause
+    // FIX 2: Use `alert` for placeholder features from the main menu.
+    // The GameUI is not visible when the main menu is active.
+    this.eventManager.on('load-game', () => {
+      alert('Load game feature coming soon!');
+    });
+
+    this.eventManager.on('settings', () => {
+      alert('Settings panel coming soon!');
+    });
+
     this.eventManager.on('game-pause', () => {
       if (this.engine) {
-        this.engine.pause();
+        this.engine.togglePause();
       }
     });
 
-    // Handle window events
+    // This event fires while the game is playing, so GameUI is visible.
+    this.eventManager.on('tool-selected', (tool: string) => {
+      console.log(`Selected tool: ${tool}`);
+      this.showMessage(`${tool} tool selected`);
+    });
+
     window.addEventListener('beforeunload', () => {
       this.cleanup();
     });
 
-    // Handle escape key to show menu
     window.addEventListener('keydown', (event) => {
       if (event.code === 'Escape' && this.currentState === GameState.PLAYING) {
         this.showMainMenu();
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      if (this.engine) {
+        this.engine.handleResize();
       }
     });
   }
@@ -52,92 +79,151 @@ class Game {
   private async initialize(): Promise<void> {
     try {
       console.log('Initializing game...');
-      
-      // Create default assets
+      this.showLoading(true);
+
       this.assetLoader.createDefaultAssets();
-      
-      // Load any additional assets here
       await this.loadGameAssets();
-      
+
+      this.showLoading(false);
+      // After initial loading, show the main menu.
+      this.showMainMenu();
       console.log('Game initialized successfully');
     } catch (error) {
       console.error('Failed to initialize game:', error);
-      this.showError('Failed to initialize game. Please refresh the page.');
+      // FIX 3: Display initialization errors directly, as the game UI isn't ready.
+      this.showFatalError('Failed to initialize game. Please refresh the page.');
     }
   }
 
   private async loadGameAssets(): Promise<void> {
-    // Define assets to load
     const assetsToLoad: LoadableAsset[] = [
-      // Add your assets here when you have them
       // { id: 'grass-texture', type: 'texture' as const, url: './assets/textures/grass.jpg' },
       // { id: 'ride-model', type: 'model' as const, url: './assets/models/ride.gltf' },
     ];
 
     if (assetsToLoad.length > 0) {
-      await this.assetLoader.loadAssets(assetsToLoad);
+      try {
+        await this.assetLoader.loadAssets(assetsToLoad);
+      } catch (error) {
+        console.warn('Some assets failed to load; using defaults:', error);
+      }
     }
+
+    // Simulate loading time for demo purposes.
+    await new Promise(resolve => setTimeout(resolve, 1000));
   }
 
-  private startGame(): void {
+  private async startGame(): Promise<void> {
     try {
-      const gameContainer = document.getElementById('game-container')!;
-      
-      // Clean up existing engine if any
-      if (this.engine) {
-        this.engine.dispose();
+      console.log('Starting new game...');
+
+      this.currentState = GameState.LOADING;
+      this.menu.hide();
+      this.showLoading(true);
+
+      // A small delay gives the UI time to update.
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      const canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
+      if (!canvas) {
+        throw new Error('Game canvas not found');
       }
 
-      // Create new engine instance
-      this.engine = new Engine(gameContainer);
-      
-      // Start the game
-      this.engine.start();
-      
+      this.engine = new Engine(canvas, this.assetLoader, this.eventManager);
+      await this.engine.initialize();
+
+      this.gameUI.show();
       this.currentState = GameState.PLAYING;
-      
+
       console.log('Game started successfully');
     } catch (error) {
       console.error('Failed to start game:', error);
       this.showError('Failed to start game. Please try again.');
-      this.showMainMenu();
+      this.showMainMenu(); // Always return to a safe state (the main menu).
+    } finally {
+        // Ensure the loading screen is always hidden after attempting to start.
+        this.showLoading(false);
     }
   }
 
   private showMainMenu(): void {
     this.currentState = GameState.MENU;
-    this.menu.showMainMenu();
-    
     if (this.engine) {
       this.engine.dispose();
       this.engine = null;
     }
+    this.gameUI.hide();
+    this.menu.show();
+  }
+
+  private showLoading(show: boolean): void {
+    // Check if loadingScreen exists to prevent errors if called during shutdown
+    if (this.loadingScreen) {
+        this.loadingScreen.classList.toggle('hidden', !show);
+    }
   }
 
   private showError(message: string): void {
-    // Simple error display - could be improved with a proper modal
-    alert(`Error: ${message}`);
+    // This method is intended for errors when the GameUI is visible.
+    this.gameUI.showMessage(`❌ ${message}`);
+  }
+
+  // FIX 3 (Implementation): New method for fatal errors when UI is not ready.
+  private showFatalError(message: string): void {
+    this.showLoading(true); // Ensure the loading container is visible
+    this.loadingScreen.innerHTML = `
+      <div style="text-align: center; padding: 20px; color: #ff6b6b;">
+        <h2>An Error Occurred</h2>
+        <p>${message}</p>
+      </div>
+    `;
+  }
+
+  private showMessage(message: string): void {
+    this.gameUI.showMessage(message);
   }
 
   private cleanup(): void {
     if (this.engine) {
       this.engine.dispose();
+      this.engine = null;
     }
-    this.assetLoader.dispose();
-    this.eventManager.removeAllListeners();
+    console.log('Game resources cleaned up.');
+  }
+
+  // Public methods for debugging
+  public getCurrentState(): GameState {
+    return this.currentState;
+  }
+
+  public getEngine(): Engine | null {
+    return this.engine;
   }
 }
 
-// Initialize the game when the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-  new Game();
+  try {
+    const game = new Game();
+    // Make the game instance available globally for debugging.
+    (window as any).game = game;
+    console.log('🎢 Park Tycoon initialized successfully!');
+  } catch (error) {
+    console.error('Failed to initialize Park Tycoon:', error);
+    // Display a user-friendly message for critical startup failures.
+    document.body.innerHTML = `<div style="text-align: center; padding: 50px; font-family: sans-serif; color: red;">
+      <h1>Critical Error</h1>
+      <p>Could not start the game. Please check the console for details.</p>
+    </div>`;
+  }
 });
 
-// Handle any uncaught errors
 window.addEventListener('error', (event) => {
   console.error('Uncaught error:', event.error);
 });
 
 window.addEventListener('unhandledrejection', (event) => {
   console.error('Unhandled promise rejection:', event.reason);
+  event.preventDefault();
 });
+
+export { Game };

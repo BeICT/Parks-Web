@@ -6,6 +6,10 @@ export class Menu {
   private mainMenu!: HTMLElement;
   private gameContainer!: HTMLElement;
   private loading!: HTMLElement;
+  private menuPanel: HTMLElement;
+  private newGameBtn: HTMLElement;
+  private loadGameBtn: HTMLElement;
+  private settingsBtn: HTMLElement;
 
   constructor(eventManager: EventManager) {
     this.eventManager = eventManager;
@@ -17,24 +21,25 @@ export class Menu {
     this.mainMenu = document.getElementById('main-menu')!;
     this.gameContainer = document.getElementById('game-container')!;
     this.loading = document.getElementById('loading')!;
+    this.menuPanel = document.getElementById('menu-panel')!;
+    this.newGameBtn = document.getElementById('new-game-btn')!;
+    this.loadGameBtn = document.getElementById('load-game-btn')!;
+    this.settingsBtn = document.getElementById('settings-btn')!;
   }
 
   private setupEventListeners(): void {
     // New game button
-    const newGameBtn = document.getElementById('new-game-btn')!;
-    newGameBtn.addEventListener('click', () => {
+    this.newGameBtn.addEventListener('click', () => {
       this.startNewGame();
     });
 
     // Load game button
-    const loadGameBtn = document.getElementById('load-game-btn')!;
-    loadGameBtn.addEventListener('click', () => {
+    this.loadGameBtn.addEventListener('click', () => {
       this.loadGame();
     });
 
     // Settings button
-    const settingsBtn = document.getElementById('settings-btn')!;
-    settingsBtn.addEventListener('click', () => {
+    this.settingsBtn.addEventListener('click', () => {
       this.showSettings();
     });
 
@@ -92,5 +97,19 @@ export class Menu {
 
   public showMainMenu(): void {
     this.showState(GameState.MENU);
+  }
+
+  public show(): void {
+    this.menuPanel.classList.remove('hidden');
+    this.menuPanel.classList.add('fade-in');
+  }
+
+  public hide(): void {
+    this.menuPanel.classList.add('hidden');
+    this.menuPanel.classList.remove('fade-in');
+  }
+
+  public isVisible(): boolean {
+    return !this.menuPanel.classList.contains('hidden');
   }
 }
