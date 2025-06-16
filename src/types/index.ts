@@ -107,7 +107,11 @@ export type GameEvent =
   | { type: 'staff-details', payload: any }
   | { type: 'start-research', payload: any }
   | { type: 'complete-research', payload: any }
-  | { type: 'marketing-campaign', payload: { cost: number, expectedGuests: number } };
+  | { type: 'marketing-campaign', payload: { cost: number, expectedGuests: number } }
+  | { type: 'start-scenario', payload: string }
+  | { type: 'scenario-started', payload: any }
+  | { type: 'scenario-completed', payload: any }
+  | { type: 'achievement-unlocked', payload: any };
 
 export type EventCallback = (data?: any) => void;
 

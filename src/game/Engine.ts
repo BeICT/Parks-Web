@@ -4,6 +4,7 @@ import { Camera } from './Camera';
 import { AssetLoader } from '../utils/AssetLoader';
 import { EventManager } from '../utils/EventManager';
 import { Park } from '../entities/Park';
+import { GameManager } from './GameManager';
 import { GameStats, BuildTool } from '../types';
 
 export class Engine {
@@ -13,6 +14,7 @@ export class Engine {
   private assetLoader: AssetLoader;
   private eventManager: EventManager;
   private park: Park;
+  private gameManager: GameManager;
   private animationId: number | null = null;
   private lastTime: number = 0;
   private isPaused: boolean = false;
@@ -56,6 +58,9 @@ export class Engine {
 
     // Initialize park
     this.park = new Park();
+    
+    // Initialize game manager
+    this.gameManager = new GameManager(this.eventManager, this.park);
 
     // Setup controls
     this.setupControls();

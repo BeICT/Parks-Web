@@ -33,9 +33,8 @@ export class ToolbarUI {
     this.elements.waterToolBtn = document.getElementById('water-tool-btn')!;
     this.elements.sceneryBtn = document.getElementById('scenery-btn')!;
     this.elements.footpathBtn = document.getElementById('footpath-btn')!;
-    this.elements.newRidesBtn = document.getElementById('new-rides-btn')!;
-
-    // Management Group
+    this.elements.newRidesBtn = document.getElementById('new-rides-btn')!;    // Management Group
+    this.elements.scenariosBtn = document.getElementById('scenarios-btn')!;
     this.elements.financesBtn = document.getElementById('finances-btn')!;
     this.elements.researchBtn = document.getElementById('research-btn')!;
     this.elements.ridesListBtn = document.getElementById('rides-list-btn')!;
@@ -63,15 +62,14 @@ export class ToolbarUI {
     this.elements.waterToolBtn?.addEventListener('click', () => this.openWaterTool());
     this.elements.sceneryBtn?.addEventListener('click', () => this.openScenery());
     this.elements.footpathBtn?.addEventListener('click', () => this.selectTool(BuildTool.PATH));
-    this.elements.newRidesBtn?.addEventListener('click', () => this.selectTool(BuildTool.RIDE));
-
-    // Management
+    this.elements.newRidesBtn?.addEventListener('click', () => this.selectTool(BuildTool.RIDE));    // Management
+    this.elements.scenariosBtn?.addEventListener('click', () => this.openScenarios());
     this.elements.financesBtn?.addEventListener('click', () => this.openFinances());
     this.elements.researchBtn?.addEventListener('click', () => this.openResearch());
     this.elements.ridesListBtn?.addEventListener('click', () => this.openRidesList());
     this.elements.parkWindowBtn?.addEventListener('click', () => this.openParkWindow());
     this.elements.staffBtn?.addEventListener('click', () => this.openStaffWindow());
-    this.elements.guestsBtn?.addEventListener('click', () => this.openGuestsWindow());    // Event listeners for game state changes
+    this.elements.guestsBtn?.addEventListener('click', () => this.openGuestsWindow());// Event listeners for game state changes
     this.eventManager.on('gameStateChanged', (state: GameStateInfo) => {
       this.updateUI(state);
     });
@@ -211,6 +209,10 @@ export class ToolbarUI {
 
   private openGuestsWindow(): void {
     this.eventManager.emit('open-window', { type: 'guests' });
+  }
+
+  private openScenarios(): void {
+    this.eventManager.emit('open-window', { type: 'scenarios' });
   }
 
   public show(): void {

@@ -1,6 +1,20 @@
 import * as THREE from 'three';
 import { Position, BuildingCost, RideConfig } from '../types';
 
+export interface RideQueue {
+  length: number;
+  waitTime: number;
+  maxLength: number;
+}
+
+export interface RideStats {
+  totalRiders: number;
+  revenue: number;
+  breakdowns: number;
+  safetyRating: number;
+  popularity: number;
+}
+
 export default class Ride {
   public id: string;
   public name: string;
@@ -19,7 +33,14 @@ export default class Ride {
   public rideTime: number;
   public currentTime: number = 0;
   public mesh?: THREE.Object3D;
-
+  public queue: RideQueue;
+  public stats: RideStats;
+  public maintenanceLevel: number = 100;
+  public staffRequired: number = 1;
+  public currentStaff: number = 0;
+  public weatherSensitive: boolean = false;
+  private cycleTimer: number = 0;
+  private maintenanceTimer: number = 0;
   constructor(config: RideConfig, position: Position) {
     this.id = config.id;
     this.name = config.name;
@@ -33,6 +54,38 @@ export default class Ride {
     this.rideTime = this.calculateRideTime();
     this.ticketPrice = this.calculateTicketPrice();
     this.calculateRidersPerHour();
+    
+    // Initialize queue
+    this.queue = {
+      length: 0,
+      waitTime: 0,
+      maxLength: config.capacity * 3
+    };
+    
+    // Initialize stats
+    this.stats = {
+      totalRiders: 0,
+      revenue: 0,
+      breakdowns: 0,
+      safetyRating: 100,
+      popularity: 50
+    };
+    
+    this.setRideProperties();
+  }
+
+  private setRideProperties(): void {
+    const rideProperties: { [key: string]: any } = {
+      'roller_coaster': { staff: 2, weatherSensitive: true },
+      'ferris_wheel': { staff: 1, weatherSensitive: true },
+      'carousel': { staff: 1, weatherSensitive: false },
+      'bumper_cars': { staff: 1, weatherSensitive: false },
+      'water_slide': { staff: 2, weatherSensitive: true }
+    };
+    
+    const props = rideProperties[this.type] || { staff: 1, weatherSensitive: false };
+    this.staffRequired = props.staff;
+    this.weatherSensitive = props.weatherSensitive;
   }
 
   private calculateRideTime(): number {

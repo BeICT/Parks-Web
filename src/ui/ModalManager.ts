@@ -63,6 +63,9 @@ export class ModalManager {
       case 'view-options':
         modal = this.createViewOptionsWindow();
         break;
+      case 'scenarios':
+        modal = this.createScenarioWindow();
+        break;
       default:
         console.warn('Unknown window type:', type);
         return;
@@ -1012,6 +1015,148 @@ Recent Activities:
       width: 350,
       height: 250
     };
+  }
+
+  private createScenarioWindow(): ModalWindow {
+    const content = document.createElement('div');
+    
+    // Title
+    const title = document.createElement('h3');
+    title.textContent = 'Choose Your Scenario';
+    title.style.cssText = `
+      margin: 0 0 8px 0;
+      font-size: 12px;
+      font-weight: bold;
+      color: #000;
+    `;
+    content.appendChild(title);
+    
+    // Description
+    const description = document.createElement('p');
+    description.textContent = 'Select a scenario to begin your theme park adventure!';
+    description.style.cssText = 'margin-bottom: 12px; font-size: 11px; color: #333;';
+    content.appendChild(description);
+    
+    // Scenario list
+    const scenarioPanel = this.createPanel('Available Scenarios');
+    scenarioPanel.style.height = '320px';
+    scenarioPanel.style.overflowY = 'auto';
+    
+    const scenarios = [
+      {
+        id: 'beginner_park',
+        name: 'Beginner\'s Paradise',
+        description: 'Perfect for new players with plenty of starting money',
+        difficulty: 'Easy',
+        money: '$100,000',
+        objectives: '3 simple objectives'
+      },
+      {
+        id: 'financial_challenge',
+        name: 'Financial Challenge',
+        description: 'Limited budget - prove your business skills',
+        difficulty: 'Medium',
+        money: '$25,000',
+        objectives: 'Profit-focused goals'
+      },
+      {
+        id: 'disaster_recovery',
+        name: 'Disaster Recovery',
+        description: 'Rebuild after disasters damaged your reputation',
+        difficulty: 'Hard',
+        money: '$50,000',
+        objectives: 'Reputation recovery'
+      },
+      {
+        id: 'mega_park',
+        name: 'Mega Park Empire',
+        description: 'Build the ultimate theme park empire',
+        difficulty: 'Expert',
+        money: '$200,000',
+        objectives: 'Massive scale goals'
+      }
+    ];
+    
+    scenarios.forEach(scenario => {
+      const scenarioItem = this.createListItem(
+        `<strong>${scenario.name}</strong> (${scenario.difficulty})<br>
+         ${scenario.description}<br>
+         Starting Money: ${scenario.money} | ${scenario.objectives}`,
+        'Click to start this scenario'
+      );
+      
+      scenarioItem.onclick = () => {
+        this.startScenario(scenario.id, scenario.name);
+      };
+      
+      scenarioPanel.appendChild(scenarioItem);
+    });
+    
+    content.appendChild(scenarioPanel);
+    
+    // Tutorial button
+    const tutorialPanel = this.createPanel();
+    const tutorialBtn = this.createButton('Show Tutorial', () => {
+      this.showTutorial();
+    });
+    tutorialBtn.style.display = 'block';
+    tutorialBtn.style.margin = '8px auto';
+    tutorialPanel.appendChild(tutorialBtn);
+    content.appendChild(tutorialPanel);
+    
+    return {
+      id: 'scenarios',
+      title: 'Scenario Selection',
+      content,
+      width: 550,
+      height: 480
+    };
+  }
+
+  private startScenario(scenarioId: string, scenarioName: string): void {
+    const confirm = window.confirm(`Start "${scenarioName}" scenario?\n\nThis will reset your current progress.`);
+    if (confirm) {
+      this.eventManager.emit('start-scenario', scenarioId);
+      this.closeWindow('scenarios');
+      this.eventManager.emit('showMessage', {
+        message: `Starting scenario: ${scenarioName}`,
+        duration: 3000
+      });
+    }
+  }
+
+  private showTutorial(): void {
+    alert(`Theme Park Tutorial:
+
+🎯 OBJECTIVE: Build and manage a successful theme park!
+
+🏗️ BUILDING:
+- Click toolbar buttons to select build tools
+- Click on terrain to place rides, shops, and decorations
+- Use the delete tool to remove unwanted objects
+
+💰 ECONOMICS:
+- Monitor your money carefully
+- Rides generate income from ticket sales
+- Shops provide additional revenue
+- Staff require monthly salaries
+
+👥 VISITORS:
+- Happy visitors spend more money and attract others
+- Unhappy visitors leave and hurt your reputation
+- Provide food, drinks, and entertainment
+
+🔧 MANAGEMENT:
+- Hire staff to maintain rides and clean the park
+- Research new technologies to unlock better attractions
+- Complete objectives to earn bonus money
+
+📊 MONITORING:
+- Use the bottom status bar to track key metrics
+- Open management windows from the toolbar
+- Watch for messages about important events
+
+Good luck building your dream park!`);
   }
 
   public closeAllWindows(): void {
