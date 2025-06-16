@@ -236,7 +236,7 @@ body {
 }
 
 /* OpenRCT2-Style Game Interface */
-#game-container {
+/*#game-container {
     position: relative;
     width: 100vw;
     height: 100vh;
@@ -246,15 +246,15 @@ body {
 
 #renderCanvas {
     position: absolute;
-    top: 50px; /* Leave space for toolbar */
+    top: 0;
     left: 0;
     width: 100%;
-    height: calc(100% - 90px); /* Account for toolbar (50px) and bottom UI (40px) */
+    height: 100%;
     z-index: 1;
 }
 
 /* Top Toolbar */
-#top-toolbar {
+/*#top-toolbar {
     position: absolute;
     top: 0;
     left: 0;
@@ -306,7 +306,7 @@ body {
 }
 
 /* Bottom UI */
-#bottom-ui {
+/*#bottom-ui {
     position: absolute;
     bottom: 0;
     left: 0;
@@ -348,7 +348,7 @@ body {
 }
 
 /* Modal Container */
-#modal-container {
+/*#modal-container {
     position: absolute;
     top: 50px;
     left: 0;

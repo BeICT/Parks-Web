@@ -22,6 +22,10 @@ export class Engine {
     this.assetLoader = assetLoader;
     this.eventManager = eventManager;
     
+    console.log('Initializing Engine with canvas:', canvas);
+    console.log('Canvas dimensions:', canvas.clientWidth, 'x', canvas.clientHeight);
+    console.log('Canvas parent:', canvas.parentElement);
+    
     // Initialize renderer
     this.renderer = new THREE.WebGLRenderer({ 
       canvas: canvas,
@@ -33,6 +37,8 @@ export class Engine {
     this.renderer.setClearColor(0x87CEEB, 1);
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    console.log('Renderer initialized with size:', canvas.clientWidth, 'x', canvas.clientHeight);
 
     // Initialize camera
     this.camera = new Camera(canvas.parentElement || document.body);
