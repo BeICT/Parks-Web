@@ -224,7 +224,6 @@ export class WeatherManager {
 
     return effect;
   }
-
   private notifyWeatherChange(): void {
     if (!this.currentWeather) return;
 
@@ -234,14 +233,8 @@ export class WeatherManager {
       duration: 4000
     });
 
-    // Emit weather change event for other systems
-    this.eventManager.emit('weather-changed', {
-      weather: this.currentWeather,
-      effects: {
-        visitorMultiplier: this.currentWeather.visitorMultiplier,
-        rideAvailability: this.currentWeather.rideAvailabilityMultiplier
-      }
-    });
+    // Weather effects are applied directly to park and rides
+    console.log('Weather changed to:', this.currentWeather.type, 'with intensity:', this.currentWeather.intensity);
   }
 
   public getCurrentWeather(): WeatherCondition | null {
@@ -279,11 +272,9 @@ export class MarketingManager {
     this.park = park;
     this.setupEventListeners();
   }
-
   private setupEventListeners(): void {
-    this.eventManager.on('start-marketing-campaign', (campaignData: any) => {
-      this.startCampaign(campaignData);
-    });
+    // Marketing campaigns will be handled through the UI system
+    // No direct event listeners needed for now
   }
 
   public update(deltaTime: number): void {
