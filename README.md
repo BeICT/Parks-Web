@@ -1,28 +1,38 @@
-# 🎢 Park Tycoon
+# Park Tycoon - Theme Park Management Simulator
 
-A 3D theme park management game built with Three.js and TypeScript. Design and manage your own theme park, build exciting rides, and keep your visitors happy!
+A modern web-based theme park management game built with TypeScript and Three.js. Build and manage your own theme park with realistic 3D graphics and engaging gameplay mechanics.
 
-## 🎮 Features
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![TypeScript](https://img.shields.io/badge/TypeScript-4.0+-blue.svg)
+![Three.js](https://img.shields.io/badge/Three.js-Latest-green.svg)
 
-- **3D Environment**: Fully 3D park with realistic lighting and shadows
-- **Interactive Building**: Place rides, shops, paths, and decorations
-- **Visitor Simulation**: AI-driven visitors with needs and preferences  
-- **Park Management**: Monitor finances, visitor happiness, and park reputation
-- **Camera Controls**: Free camera movement with WASD, mouse rotation, and zoom
-- **Real-time Updates**: Dynamic park simulation with real-time statistics
+## About
 
-## 🚀 Getting Started
+Park Tycoon is an open-source theme park management simulator that lets you build, manage, and grow your own amusement park. Inspired by classic tycoon games, it features modern 3D graphics, realistic economic simulation, and engaging gameplay mechanics.
+
+### Key Features
+
+- **8 Unique Ride Types** - From gentle carousels to extreme drop towers
+- **3D Visualization** - Beautiful Three.js powered 3D park rendering
+- **Economic Simulation** - Realistic financial management and budgeting
+- **Staff Management** - Hire and manage different types of park staff
+- **Scenario Challenges** - Multiple scenarios with varying difficulty levels
+- **Achievement System** - Unlock rewards and track your progress
+- **Research & Development** - Advance your park through technology research
+
+## Getting Started
 
 ### Prerequisites
 
-- Node.js (version 14 or higher)
+- Node.js (v14 or higher)
 - npm or yarn package manager
+- Modern web browser with WebGL support
 
 ### Installation
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/parks-web.git
+git clone https://github.com/BeICT/parks-web.git
 cd parks-web
 ```
 
@@ -44,127 +54,125 @@ npm start
 npm run build
 ```
 
-## 🎯 How to Play
+The built files will be available in the `dist` directory.
 
-### Controls
+## How to Play
 
-- **WASD** or **Arrow Keys**: Move camera
-- **Right Click + Drag**: Rotate camera view
-- **Mouse Wheel**: Zoom in/out
-- **Q/E**: Rotate camera left/right
-- **ESC**: Return to main menu
+1. **Start the Game** - Launch Park Tycoon and select "New Game" from the main menu
+2. **Choose a Scenario** - Pick from beginner to expert difficulty challenges
+3. **Build Your Park** - Use the toolbar to construct rides, shops, and facilities
+4. **Manage Operations** - Hire staff, research technologies, and monitor finances
+5. **Achieve Goals** - Complete scenario objectives and unlock achievements
 
-### Building
+### Game Controls
 
-1. Select a building tool from the bottom toolbar
-2. Click on the ground to place items
-3. Use the delete tool to remove buildings
-4. Monitor your budget and visitor happiness
+- **Left Click** - Build structures, interact with UI
+- **Right Click** - Delete objects (when delete tool is selected)
+- **Mouse Wheel** - Zoom in/out
+- **Mouse Drag** - Rotate camera view
+- **ESC** - Toggle main menu
 
-### Game Elements
+### Available Rides
 
-- **Rides**: Attract visitors and generate income
-  - Roller Coaster: High excitement, expensive to build
-  - Ferris Wheel: Family-friendly, moderate cost
-  - Carousel: Low intensity, cheap to maintain
+- **Ferris Wheel** - Classic observation ride for all ages
+- **Roller Coaster** - High-thrill experience for adrenaline seekers
+- **Carousel** - Traditional family-friendly spinning ride
+- **Bumper Cars** - Interactive collision-based fun
+- **Water Slide** - Refreshing summer thrill attraction
+- **Haunted House** - Spooky dark ride experience
+- **Drop Tower** - Extreme vertical drop experience
+- **Spinning Teacups** - Whimsical spinning family ride
 
-- **Shops**: Provide food and drinks for visitors
-- **Paths**: Connect different areas of your park
-- **Decorations**: Improve park aesthetics and visitor happiness
+## Development Status
 
-## 🛠️ Development
+This is a community-driven project in active development. Current status:
+
+### ✅ Completed Features
+- Core gameplay mechanics and 3D rendering
+- Eight unique ride types with custom 3D models
+- User interface and park management systems
+- Multiple challenge scenarios
+- Achievement and progression systems
+
+### ⚠️ Features with Limitations
+- Save/load functionality (planned)
+- Advanced AI systems (basic implementation)
+- Sound and music system (not implemented)
+- Mobile device optimization (limited)
+
+### 🚧 In Development
+- Enhanced graphics and visual effects
+- Additional ride types and customization
+- Advanced visitor and staff AI
+- Comprehensive tutorial system
+
+### � Planned Features
+- Multiplayer park sharing
+- Custom scenario editor
+- Modding support and API
+- Advanced analytics and reporting
+
+## Contributing
+
+We welcome contributions from the community! Whether you're a developer, designer, or theme park enthusiast, there are many ways to help.
+
+### How to Contribute
+
+1. **Fork the repository**
+2. **Create a feature branch** (`git checkout -b feature/amazing-feature`)
+3. **Make your changes**
+4. **Commit your changes** (`git commit -m 'Add some amazing feature'`)
+5. **Push to the branch** (`git push origin feature/amazing-feature`)
+6. **Open a Pull Request**
+
+### Development Guidelines
+
+- Follow TypeScript best practices and maintain type safety
+- Maintain consistent code formatting and style
+- Add comprehensive comments for complex logic
+- Test changes across different browsers
+- Update documentation for new features
+
+### Issues and Bug Reports
+
+Found a bug or have a feature request? Please:
+
+1. Check existing issues to avoid duplicates
+2. Create a new issue with clear description
+3. Include steps to reproduce (for bugs)
+4. Provide browser and system information
+5. Add screenshots or videos if helpful
+
+## Technical Architecture
+
+### Built With
+
+- **TypeScript** - Type-safe JavaScript development
+- **Three.js** - 3D graphics and rendering engine
+- **Webpack** - Module bundling and build system
+- **HTML5/CSS3** - Modern web standards and responsive design
 
 ### Project Structure
 
 ```
 src/
-├── entities/       # Game entities (Park, Ride, Visitor)
-├── game/          # Core game engine (Engine, Scene, Camera)
-├── ui/            # User interface components
-├── utils/         # Utility classes (EventManager, AssetLoader)
-├── types/         # TypeScript type definitions
-└── index.ts       # Main entry point
+├── entities/          # Game entities (Park, Ride, Visitor)
+├── game/             # Core game systems (Engine, Scene, Camera)
+├── ui/               # User interface components and modals
+├── utils/            # Utility classes and helpers
+├── types/            # TypeScript type definitions
+└── index.ts          # Application entry point
+
+public/
+├── css/              # Stylesheets and themes
+├── assets/           # Game assets and textures
+└── index.html        # Main HTML file
 ```
 
-### Technologies Used
+### Key Components
 
-- **Three.js**: 3D graphics and rendering
-- **TypeScript**: Type-safe JavaScript development
-- **Webpack**: Module bundling and build system
-- **HTML5 Canvas**: 2D UI elements and overlays
-
-### Adding New Features
-
-1. **New Ride Types**: Extend the `Ride` class in `src/entities/Ride.ts`
-2. **UI Components**: Add new elements to `src/ui/`
-3. **Game Mechanics**: Modify the game loop in `src/game/Engine.ts`
-4. **Asset Loading**: Use `AssetLoader` for textures and models
-
-### Code Style
-
-- Use TypeScript strict mode
-- Follow ESLint configuration
-- Use meaningful variable and function names
-- Add JSDoc comments for public methods
-
-## 📦 Scripts
-
-- `npm start`: Start development server with hot reload
-- `npm run build`: Build for production
-- `npm run dev`: Build in development mode with watch
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🎨 Assets
-
-The game uses procedurally generated textures and simple geometric shapes. To add custom assets:
-
-1. Place textures in `public/assets/textures/`
-2. Place 3D models in `public/assets/models/`
-3. Update the asset loader in `src/utils/AssetLoader.ts`
-
-## 🐛 Known Issues
-
-- Audio system not yet implemented
-- Save/Load functionality is placeholder
-- Advanced ride customization not available
-- Mobile device support needs optimization
-
-## 🚀 Future Features
-
-- [ ] Save/Load game functionality
-- [ ] More ride types and customization
-- [ ] Weather system
-- [ ] Staff management
-- [ ] Research and development tree
-- [ ] Multiplayer support
-- [ ] Mobile responsive design
-- [ ] Sound effects and music
-
-## 📞 Support
-
-If you encounter any issues or have questions:
-
-1. Check the [Issues](https://github.com/yourusername/parks-web/issues) page
-2. Create a new issue with detailed description
-3. Include browser information and console errors
-
-## 🙏 Acknowledgments
-
-- Three.js community for excellent documentation
-- Park simulation games for inspiration
-- Open source contributors
-
----
-
-Made with ❤️ and JavaScript
+- **Engine** - Main game engine managing rendering and updates
+- **Park** - Central game state and management logic
+- **Scene** - 3D scene setup and object management
+- **UI System** - Modal windows and interface management
+- **Event System** - Decoupled communication between components

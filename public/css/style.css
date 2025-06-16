@@ -475,3 +475,313 @@ body {
     margin-bottom: 4px;
     color: #000;
 }
+
+/* Main Menu Styles */
+.main-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.main-menu {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  padding: 0;
+  max-width: 900px;
+  width: 90%;
+  max-height: 600px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-header {
+  background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
+  color: white;
+  padding: 30px;
+  text-align: center;
+}
+
+.game-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-icon {
+  margin-bottom: 10px;
+}
+
+.game-title {
+  font-size: 36px;
+  font-weight: bold;
+  margin: 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.game-subtitle {
+  font-size: 16px;
+  margin: 5px 0 0 0;
+  opacity: 0.9;
+}
+
+.menu-content {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.menu-buttons {
+  flex: 1;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  justify-content: center;
+}
+
+.menu-btn {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px 20px;
+  border: 2px solid #ddd;
+  background: white;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+  min-height: 50px;
+}
+
+.menu-btn:hover {
+  background: #f8f9fa;
+  border-color: #4A90E2;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.menu-btn.primary {
+  background: #4A90E2;
+  color: white;
+  border-color: #357ABD;
+}
+
+.menu-btn.primary:hover {
+  background: #357ABD;
+  border-color: #2E5C8A;
+}
+
+.menu-btn.secondary {
+  background: #f8f9fa;
+  color: #666;
+  border-color: #ddd;
+}
+
+.menu-btn.secondary:hover {
+  background: #e9ecef;
+  border-color: #adb5bd;
+}
+
+.btn-icon {
+  font-size: 20px;
+  width: 24px;
+  text-align: center;
+}
+
+.btn-text {
+  flex: 1;
+}
+
+.menu-sidebar {
+  width: 300px;
+  background: #f8f9fa;
+  padding: 30px;
+  border-left: 1px solid #ddd;
+}
+
+.feature-notice {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  border-left: 4px solid #FFC107;
+}
+
+.feature-notice h3 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 18px;
+}
+
+.feature-notice p {
+  margin: 0 0 15px 0;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.status-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  position: relative;
+}
+
+.status-item::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: block;
+}
+
+.status-item.working {
+  background: #e8f5e8;
+  color: #2e7d32;
+}
+
+.status-item.working::before {
+  background: #4caf50;
+}
+
+.status-item.pending {
+  background: #fff3e0;
+  color: #f57c00;
+}
+
+.status-item.pending::before {
+  background: #ff9800;
+}
+
+.menu-footer {
+  background: #f8f9fa;
+  padding: 20px 30px;
+  border-top: 1px solid #ddd;
+  text-align: center;
+}
+
+.credits {
+  color: #666;
+  font-size: 13px;
+}
+
+.credits p {
+  margin: 2px 0;
+}
+
+.credit-link {
+  color: #4A90E2;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.credit-link:hover {
+  text-decoration: underline;
+}
+
+.version {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+/* About Dialog Styles */
+.about-dialog {
+  max-width: 500px;
+  width: 90%;
+}
+
+.about-content h3 {
+  color: #4A90E2;
+  margin: 0 0 10px 0;
+}
+
+.about-content h4 {
+  color: #333;
+  margin: 20px 0 8px 0;
+  font-size: 16px;
+}
+
+.about-content p {
+  margin: 0 0 10px 0;
+  color: #666;
+  line-height: 1.5;
+}
+
+.about-content ul {
+  margin: 10px 0;
+  padding-left: 20px;
+  color: #666;
+}
+
+.about-content li {
+  margin: 4px 0;
+  line-height: 1.4;
+}
+
+.credits-section {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 6px;
+  margin-top: 20px;
+}
+
+.credits-section p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.credits-section a {
+  color: #4A90E2;
+  text-decoration: none;
+}
+
+.credits-section a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .main-menu {
+    width: 95%;
+    max-height: 90vh;
+  }
+  
+  .menu-content {
+    flex-direction: column;
+  }
+  
+  .menu-sidebar {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid #ddd;
+  }
+  
+  .game-title {
+    font-size: 28px;
+  }
+  
+  .menu-buttons {
+    padding: 20px;
+  }
+}

@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { Engine } from './game/Engine';
 import { Menu } from './ui/Menu';
 import { GameUI } from './ui/GameUI';
+import { MainMenu } from './ui/MainMenu';
 import EventManager from './utils/EventManager';
 import { AssetLoader } from './utils/AssetLoader';
 import { Park } from './entities/Park';
@@ -11,6 +12,7 @@ class Game {
   private engine!: Engine;
   private menu!: Menu;
   private gameUI!: GameUI;
+  private mainMenu!: MainMenu;
   private eventManager: EventManager;
   private assetLoader!: AssetLoader;
   private park!: Park; // The main park instance
@@ -23,6 +25,7 @@ class Game {
     this.assetLoader = new AssetLoader(this.eventManager);
     this.menu = new Menu(this.eventManager);
     this.gameUI = new GameUI(this.eventManager); // GameUI might need EventManager too
+    this.mainMenu = new MainMenu(this.eventManager);
 
     // Define assets first
     this.assetLoader.createDefaultAssets();
@@ -103,12 +106,14 @@ class Game {
     });
 
     this.menu.hideLoadingScreen();
-    this.menu.showMainMenu();
+    // Show the new main menu instead of the old one
+    this.mainMenu.show();
   }
 
   private startGame(): void {
     console.log('Starting new game...');
     this.menu.hideMainMenu();
+    this.mainMenu.hide();
     
     // Ensure game container and canvas are visible
     const gameContainer = document.getElementById('game-container');
