@@ -97,7 +97,11 @@ export type GameEvent =
   | { type: 'camera-zoom', payload: { direction: string } }
   | { type: 'camera-rotate' }
   | { type: 'open-window', payload: { type: string } }
-  | { type: 'game-date-changed', payload: string };
+  | { type: 'close-window', payload: string }
+  | { type: 'game-date-changed', payload: string }
+  | { type: 'gameStateChanged', payload: GameStateInfo }
+  | { type: 'toolChanged', payload: BuildTool }
+  | { type: 'toggle-map' };
 
 export type EventCallback = (data?: any) => void;
 
@@ -119,4 +123,11 @@ export interface LoadableAsset {
   id: string;
   type: 'texture' | 'model' | 'audio';
   url: string;
+}
+
+export interface GameStateInfo {
+  isPaused: boolean;
+  gameSpeed: number;
+  currentTool: BuildTool;
+  currentDate: Date;
 }
