@@ -145,4 +145,32 @@ export class Camera {
     this.target.copy(position);
     this.updateCameraPosition();
   }
+
+  public zoomIn(): void {
+    this.distance = Math.max(10, this.distance - 5);
+    this.updateCameraPosition();
+    console.log('Camera zoomed in, distance:', this.distance);
+  }
+
+  public zoomOut(): void {
+    this.distance = Math.min(150, this.distance + 5);
+    this.updateCameraPosition();
+    console.log('Camera zoomed out, distance:', this.distance);
+  }
+
+  public rotate(): void {
+    this.angle += Math.PI / 4; // Rotate 45 degrees
+    this.updateCameraPosition();
+    console.log('Camera rotated, angle:', this.angle);
+  }
+
+  public setDistance(distance: number): void {
+    this.distance = Math.max(10, Math.min(150, distance));
+    this.updateCameraPosition();
+  }
+
+  public setHeight(height: number): void {
+    this.height = Math.max(10, Math.min(100, height));
+    this.updateCameraPosition();
+  }
 }
