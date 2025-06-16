@@ -10,42 +10,50 @@ export class GameUI {
     this.eventManager = eventManager;
 
     this.elements.statsPanel = document.getElementById('stats-panel')!;
-    this.elements.money = document.getElementById('money')!;
-    this.elements.visitors = document.getElementById('visitors')!;
-    this.elements.happiness = document.getElementById('happiness')!;
-    this.elements.reputation = document.getElementById('reputation')!; // Added
+    this.elements.money = document.getElementById('money-stat')!;
+    this.elements.visitors = document.getElementById('visitors-stat')!;
+    this.elements.happiness = document.getElementById('happiness-stat')!;
+    this.elements.reputation = document.getElementById('reputation-stat')!;
     
-    // Tools panel
-    this.elements.toolsPanel = document.getElementById('tools-panel')!;
-    this.elements.pauseBtn = document.getElementById('pause-btn')!;
+    // Controls panel
     this.elements.controlsPanel = document.getElementById('controls-panel')!;
+    this.elements.buildRideBtn = document.getElementById('build-ride-btn')!;
+    this.elements.bulldozeBtn = document.getElementById('bulldoze-btn')!;
+    this.elements.toggleGridBtn = document.getElementById('toggle-grid-btn')!;
+    this.elements.mainMenuReturnBtn = document.getElementById('main-menu-return-btn')!;
     
-    // Tool buttons
-    const toolButtons = document.querySelectorAll('.tool-button');
-    toolButtons.forEach(button => {
-      const tool = button.getAttribute('data-tool') as BuildTool;
-      if (tool) {
-        this.elements[tool] = button as HTMLElement;
-      }
-    });
+    // Build tools panel
+    this.elements.buildTools = document.getElementById('build-tools')!;
+    this.elements.messageDisplay = document.getElementById('message-display')!;
+
+    this.setupEventListeners();
   }
 
   private setupEventListeners(): void {
-    // Pause button
-    this.elements.pauseBtn.addEventListener('click', () => {
-      this.eventManager.emit('game-pause');
-    });
+    // Control buttons
+    if (this.elements.buildRideBtn) {
+      this.elements.buildRideBtn.addEventListener('click', () => {
+        this.selectTool(BuildTool.RIDE);
+      });
+    }
 
-    // Tool buttons
-    Object.keys(this.elements).forEach(key => {
-      if (key !== 'money' && key !== 'visitors' && key !== 'happiness' && 
-          key !== 'pauseBtn' && key !== 'statsPanel' && key !== 'toolsPanel' && 
-          key !== 'controlsPanel') {
-        this.elements[key].addEventListener('click', () => {
-          this.selectTool(key as BuildTool);
-        });
-      }
-    });
+    if (this.elements.bulldozeBtn) {
+      this.elements.bulldozeBtn.addEventListener('click', () => {
+        this.selectTool(BuildTool.DELETE);
+      });
+    }
+
+    if (this.elements.toggleGridBtn) {
+      this.elements.toggleGridBtn.addEventListener('click', () => {
+        this.eventManager.emit('tool-selected', BuildTool.NONE);
+      });
+    }
+
+    if (this.elements.mainMenuReturnBtn) {
+      this.elements.mainMenuReturnBtn.addEventListener('click', () => {
+        this.eventManager.emit('returnToMainMenu');
+      });
+    }
 
     // Listen for stats updates
     this.eventManager.on('statsUpdated', (stats: GameStats) => {
@@ -55,17 +63,17 @@ export class GameUI {
 
   private selectTool(tool: BuildTool): void {
     // Remove active class from all tool buttons
-    Object.keys(this.elements).forEach(key => {
-      if (key !== 'money' && key !== 'visitors' && key !== 'happiness' && 
-          key !== 'pauseBtn' && key !== 'statsPanel' && key !== 'toolsPanel' && 
-          key !== 'controlsPanel') {
-        this.elements[key].classList.remove('active');
+    [this.elements.buildRideBtn, this.elements.bulldozeBtn].forEach(btn => {
+      if (btn) {
+        btn.classList.remove('active');
       }
     });
 
     // Add active class to selected tool
-    if (this.elements[tool]) {
-      this.elements[tool].classList.add('active');
+    if (tool === BuildTool.RIDE && this.elements.buildRideBtn) {
+      this.elements.buildRideBtn.classList.add('active');
+    } else if (tool === BuildTool.DELETE && this.elements.bulldozeBtn) {
+      this.elements.bulldozeBtn.classList.add('active');
     }
 
     this.eventManager.emit('tool-selected', tool);
@@ -88,30 +96,38 @@ export class GameUI {
 
   public show(): void {
     this.isVisible = true;
-    this.elements.statsPanel.classList.remove('hidden');
-    this.elements.toolsPanel.classList.remove('hidden');
-    this.elements.pauseBtn.classList.remove('hidden');
-    this.elements.controlsPanel.classList.remove('hidden');
     
-    // Add fade-in animation
-    this.elements.statsPanel.classList.add('fade-in');
-    this.elements.toolsPanel.classList.add('fade-in');
-    this.elements.pauseBtn.classList.add('fade-in');
-    this.elements.controlsPanel.classList.add('fade-in');
+    // Show game UI
+    const gameUI = document.getElementById('game-ui');
+    if (gameUI) {
+      gameUI.classList.remove('hidden');
+    }
+    
+    if (this.elements.statsPanel) {
+      this.elements.statsPanel.classList.remove('hidden');
+    }
+    
+    if (this.elements.controlsPanel) {
+      this.elements.controlsPanel.classList.remove('hidden');
+    }
   }
 
   public hide(): void {
     this.isVisible = false;
-    this.elements.statsPanel.classList.add('hidden');
-    this.elements.toolsPanel.classList.add('hidden');
-    this.elements.pauseBtn.classList.add('hidden');
-    this.elements.controlsPanel.classList.add('hidden');
     
-    // Remove animations
-    this.elements.statsPanel.classList.remove('fade-in');
-    this.elements.toolsPanel.classList.remove('fade-in');
-    this.elements.pauseBtn.classList.remove('fade-in');
-    this.elements.controlsPanel.classList.remove('fade-in');
+    // Hide game UI
+    const gameUI = document.getElementById('game-ui');
+    if (gameUI) {
+      gameUI.classList.add('hidden');
+    }
+    
+    if (this.elements.statsPanel) {
+      this.elements.statsPanel.classList.add('hidden');
+    }
+    
+    if (this.elements.controlsPanel) {
+      this.elements.controlsPanel.classList.add('hidden');
+    }
   }
 
   public showMessage(message: string, duration: number = 3000): void {

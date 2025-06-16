@@ -44,7 +44,7 @@ export class Scene {
   private createTerrain(): void {
     const groundGeometry = new THREE.PlaneGeometry(200, 200, 50, 50);
     
-    const grassTexture = this.assetLoader.getAsset('default-grass');
+    const grassTexture = this.assetLoader.getAsset('grass-texture');
     if (grassTexture && grassTexture instanceof THREE.Texture) {
       grassTexture.wrapS = THREE.RepeatWrapping;
       grassTexture.wrapT = THREE.RepeatWrapping;

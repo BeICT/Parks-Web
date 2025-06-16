@@ -67,9 +67,7 @@ export class AssetLoader {
       { id: 'ferrisWheelModel', path: 'assets/models/ferris_wheel.glb', type: AssetType.MODEL, rideDetails: ferrisWheelRideConfig },
       { id: 'rollerCoasterModel', path: 'assets/models/roller_coaster.glb', type: AssetType.MODEL, rideDetails: rollerCoasterRideConfig },
       { id: 'carouselModel', path: 'assets/models/carousel.glb', type: AssetType.MODEL, rideDetails: carouselRideConfig },
-      { id: 'grassTexture', path: 'assets/textures/grass.png', type: AssetType.TEXTURE },
-      { id: 'pathTexture', path: 'assets/textures/path.png', type: AssetType.TEXTURE },
-      // Add more assets here
+      // Note: Procedural textures are created in createDefaultAssets(), not loaded from files
     ];
   }
 
