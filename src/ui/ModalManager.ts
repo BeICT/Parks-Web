@@ -554,8 +554,7 @@ export class ModalManager {
     ridesPanel.style.height = '220px';
     ridesPanel.style.overflowY = 'auto';
     ridesPanel.id = 'rides-list-container';
-    
-    const rides = [
+      const rides = [
       { 
         name: '🎢 Twist & Spin Coaster', 
         type: 'Thrill',
@@ -588,6 +587,61 @@ export class ModalManager {
         excitement: 6.1,
         intensity: 2.3,
         nausea: 1.2
+      },
+      { 
+        name: '🚗 Bumper Cars', 
+        type: 'Family',
+        status: 'Operational', 
+        popularity: 4, 
+        queue: 15, 
+        income: 18,
+        excitement: 4.0,
+        intensity: 3.0,
+        nausea: 2.0
+      },
+      { 
+        name: '🌊 Water Slide', 
+        type: 'Thrill',
+        status: 'Operational', 
+        popularity: 5, 
+        queue: 22, 
+        income: 30,
+        excitement: 6.0,
+        intensity: 4.0,
+        nausea: 3.0
+      },
+      { 
+        name: '👻 Haunted House', 
+        type: 'Thrill',
+        status: 'Operational', 
+        popularity: 4, 
+        queue: 18, 
+        income: 35,
+        excitement: 7.0,
+        intensity: 5.0,
+        nausea: 4.0
+      },
+      { 
+        name: '🗼 Drop Tower', 
+        type: 'Extreme',
+        status: 'Operational', 
+        popularity: 5, 
+        queue: 10, 
+        income: 40,
+        excitement: 8.0,
+        intensity: 9.0,
+        nausea: 5.0
+      },
+      { 
+        name: '🫖 Spinning Teacups', 
+        type: 'Family',
+        status: 'Operational', 
+        popularity: 3, 
+        queue: 12, 
+        income: 14,
+        excitement: 3.0,
+        intensity: 2.0,
+        nausea: 6.0
       }
     ];
     
@@ -609,15 +663,14 @@ export class ModalManager {
     });
     
     content.appendChild(ridesPanel);
-    
-    // Summary panel
+      // Summary panel
     const summaryPanel = this.createPanel('Park Statistics');
     summaryPanel.innerHTML = `
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 11px;">
-        <div><strong>Total Rides:</strong> 3</div>
-        <div><strong>Operational:</strong> 2</div>
-        <div><strong>Total Queue:</strong> 20 guests</div>
-        <div><strong>Hourly Income:</strong> $40</div>
+        <div><strong>Total Rides:</strong> 8</div>
+        <div><strong>Operational:</strong> 7</div>
+        <div><strong>Total Queue:</strong> 107 guests</div>
+        <div><strong>Hourly Income:</strong> $177</div>
       </div>
     `;
     

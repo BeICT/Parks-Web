@@ -4,6 +4,7 @@ import { Camera } from './Camera';
 import { AssetLoader } from '../utils/AssetLoader';
 import { EventManager } from '../utils/EventManager';
 import { Park } from '../entities/Park';
+import Ride from '../entities/Ride';
 import { GameManager } from './GameManager';
 import { GameStats, BuildTool } from '../types';
 
@@ -162,19 +163,73 @@ export class Engine {
   private buildRide(position: THREE.Vector3): void {
     console.log('Building ride at:', position);
     
-    // Create a simple ride placeholder
-    const rideGeometry = new THREE.CylinderGeometry(5, 5, 8);
-    const rideMaterial = new THREE.MeshLambertMaterial({ color: 0xFF6B6B });
-    const rideMesh = new THREE.Mesh(rideGeometry, rideMaterial);
+    // Cycle through different ride types for variety
+    const rideTypes = ['ferris_wheel', 'roller_coaster', 'carousel', 'bumper_cars', 'water_slide', 'haunted_house', 'drop_tower', 'spinning_teacups'];
+    const randomType = rideTypes[Math.floor(Math.random() * rideTypes.length)];
     
-    rideMesh.position.set(position.x, 4, position.z);
-    rideMesh.name = `ride_${Date.now()}`;
+    let ride;
+    const rideId = `ride_${Date.now()}`;
+    const ridePosition = { x: position.x, y: 0, z: position.z };
+    
+    // Create the appropriate ride type
+    switch (randomType) {
+      case 'ferris_wheel':
+        ride = Ride.createFerrisWheel(rideId, ridePosition);
+        break;
+      case 'roller_coaster':
+        ride = Ride.createRollerCoaster(rideId, ridePosition);
+        break;
+      case 'carousel':
+        ride = Ride.createCarousel(rideId, ridePosition);
+        break;
+      case 'bumper_cars':
+        ride = Ride.createBumperCars(rideId, ridePosition);
+        break;
+      case 'water_slide':
+        ride = Ride.createWaterSlide(rideId, ridePosition);
+        break;
+      case 'haunted_house':
+        ride = Ride.createHauntedHouse(rideId, ridePosition);
+        break;
+      case 'drop_tower':
+        ride = Ride.createDropTower(rideId, ridePosition);
+        break;
+      case 'spinning_teacups':
+        ride = Ride.createSpinningTeacups(rideId, ridePosition);
+        break;
+      default:
+        ride = Ride.createCarousel(rideId, ridePosition);
+    }
+    
+    // Check if player has enough money
+    if (this.park.money < ride.cost.money) {
+      this.eventManager.emit('message-show', {
+        title: 'Insufficient Funds',
+        message: `You need $${ride.cost.money} to build ${ride.name}. You have $${this.park.money}.`,
+        type: 'error'
+      });
+      return;
+    }
+    
+    // Deduct cost and add ride
+    this.park.spendMoney(ride.cost.money);
+    this.park.addRide(ride);
+    
+    // Create and add the 3D mesh
+    const rideMesh = ride.createMesh();
+    rideMesh.position.set(position.x, 0, position.z);
+    rideMesh.name = rideId;
     rideMesh.castShadow = true;
     
     this.scene.addObject(rideMesh);
     
-    // Add to park (simplified)
-    // In a real implementation, this would create a proper Ride entity
+    // Show success message
+    this.eventManager.emit('message-show', {
+      title: 'Ride Built!',
+      message: `${ride.name} has been built for $${ride.cost.money}!`,
+      type: 'success'
+    });
+    
     console.log('Ride built successfully!');
   }
 
