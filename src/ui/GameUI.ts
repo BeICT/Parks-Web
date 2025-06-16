@@ -24,6 +24,11 @@ export class GameUI {
     this.eventManager.on('statsUpdated', (stats: GameStats) => {
       this.bottomUI.updateStats(stats);
     });
+
+    // Listen for messages to display
+    this.eventManager.on('showMessage', (data: { message: string, duration?: number }) => {
+      this.showMessage(data.message, data.duration || 2000);
+    });
   }
 
   public updateStats(stats: GameStats): void {
@@ -48,16 +53,38 @@ export class GameUI {
     this.bottomUI.hide();
   }
 
-  public showMessage(message: string, duration: number = 3000): void {
-    const messageDisplay = document.getElementById('message-display');
-    if (messageDisplay) {
-      messageDisplay.textContent = message;
-      messageDisplay.style.display = 'block';
-      
+  private showMessage(message: string, duration: number = 2000): void {
+    // Create message element
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'game-message';
+    messageDiv.textContent = message;
+    messageDiv.style.cssText = `
+      position: fixed;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-family: 'MS Sans Serif', sans-serif;
+      font-size: 12px;
+      z-index: 10000;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    `;
+
+    document.body.appendChild(messageDiv);
+
+    // Fade out and remove after duration
+    setTimeout(() => {
+      messageDiv.style.opacity = '0';
       setTimeout(() => {
-        messageDisplay.style.display = 'none';
-      }, duration);
-    }
+        if (messageDiv.parentNode) {
+          messageDiv.parentNode.removeChild(messageDiv);
+        }
+      }, 300);
+    }, duration);
   }
 
   public isShowing(): boolean {
