@@ -359,7 +359,41 @@ export class Engine {
 
   public setCurrentTool(tool: BuildTool): void {
     this.currentTool = tool;
+    
+    // Show build grid when a build tool is selected
+    if (tool !== BuildTool.NONE && tool !== BuildTool.DELETE) {
+      this.showBuildGridVisualization();
+    } else {
+      this.hideBuildGridVisualization();
+    }
+    
+    // Update cursor or visual feedback
+    const canvas = this.renderer.domElement;
+    if (tool === BuildTool.NONE) {
+      canvas.style.cursor = 'default';
+    } else if (tool === BuildTool.DELETE) {
+      canvas.style.cursor = 'crosshair';
+    } else {
+      canvas.style.cursor = 'copy';
+    }
+    
     console.log('Current tool set to:', tool);
+  }
+
+  private showBuildGridVisualization(): void {
+    if (this.showBuildGrid) return;
+    
+    this.showBuildGrid = true;
+    this.buildGridGroup = this.buildManager.getGridVisualization();
+    this.scene.addObject(this.buildGridGroup);
+  }
+
+  private hideBuildGridVisualization(): void {
+    if (!this.showBuildGrid || !this.buildGridGroup) return;
+    
+    this.showBuildGrid = false;
+    this.scene.removeObject(this.buildGridGroup);
+    this.buildGridGroup = null;
   }
 
   public getCurrentTool(): BuildTool {
