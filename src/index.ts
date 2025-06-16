@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { Engine } from './game/Engine';
 import { Menu } from './ui/Menu';
 import { GameUI } from './ui/GameUI';
