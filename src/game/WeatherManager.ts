@@ -292,7 +292,7 @@ export class MarketingManager {
     this.activeCampaigns = this.activeCampaigns.filter(c => c.active);
   }
 
-  private startCampaign(campaignData: any): boolean {
+  public startCampaign(campaignData: any): boolean {
     const campaign = this.createCampaign(campaignData);
     
     if (this.park.stats.money < campaign.cost) {

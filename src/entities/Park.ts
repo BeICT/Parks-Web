@@ -401,14 +401,29 @@ export class Park {
     // Base spawn rate: 1 visitor every 5 seconds
     let spawnRate = 5;
     
-    // Weather effects
-    if (this.weather === 'rainy') spawnRate *= 1.8;
-    else if (this.weather === 'snowy') spawnRate *= 2.2;
-    else if (this.weather === 'sunny' && this.season === 'summer') spawnRate *= 0.7;
+    // Weather effects - now using the weather event from WeatherManager
+    if (this.currentWeatherEvent) {
+      // Apply weather multiplier to spawn rate (lower multiplier = fewer visitors = longer spawn time)
+      spawnRate /= this.currentWeatherEvent.visitorMultiplier;
+    } else {
+      // Fallback to old weather system if WeatherManager isn't active
+      if (this.weather === 'rainy') spawnRate *= 1.8;
+      else if (this.weather === 'snowy') spawnRate *= 2.2;
+      else if (this.weather === 'sunny' && this.season === 'summer') spawnRate *= 0.7;
+    }
     
     // Reputation effects
     const reputationMultiplier = Math.max(0.3, this.stats.reputation / 500);
     spawnRate /= reputationMultiplier;
+    
+    // Marketing campaign effects
+    let marketingBoost = 1.0;
+    this.marketingCampaigns.forEach(campaign => {
+      if (campaign.active) {
+        marketingBoost += (campaign.effectiveness / 100) * 0.3; // 30% max boost per campaign
+      }
+    });
+    spawnRate /= marketingBoost;
     
     // Park capacity limits
     const maxVisitors = Math.min(500, this.rides.length * 50 + this.facilities.length * 20);
@@ -424,32 +439,48 @@ export class Park {
     // Income from rides
     let rideIncome = 0;
     this.rides.forEach(ride => {
-      if (ride.isOperational) {
-        rideIncome += ride.ticketPrice * ride.ridersPerHour * (deltaTime / 3600);
+      if (ride.isOperational && ride.isOperating) {
+        // Consider weather effects on ride operations
+        let weatherMultiplier = 1.0;
+        if (this.currentWeatherEvent) {
+          weatherMultiplier = this.currentWeatherEvent.rideAvailabilityMultiplier;
+        }
+        
+        const actualRidersPerHour = ride.ridersPerHour * weatherMultiplier;
+        rideIncome += ride.ticketPrice * actualRidersPerHour * (deltaTime / 3600);
       }
     });
 
+    // Income from facilities (shops, restaurants, etc.)
+    let facilityIncome = 0;
+    this.facilities.forEach(facility => {
+      if (facility.currentCustomers > 0) {
+        facilityIncome += facility.income * (deltaTime / 3600);
+      }
+    });
+
+    // Park entrance fees - based on actual visitors entering
+    const entranceFees = this.visitors.length * this.ticketPrice * 0.001 * (deltaTime / 3600);
+
     // Operating costs
-    const staffCosts = this.rides.length * 5 * (deltaTime / 3600); // $5 per ride per hour
-    const maintenanceCosts = this.rides.length * 2 * (deltaTime / 3600); // $2 per ride per hour
+    const staffCosts = this.staff.length * 20 * (deltaTime / 3600); // $20 per staff per hour
+    const rideMaintenance = this.rides.length * 3 * (deltaTime / 3600); // $3 per ride per hour
+    const facilityMaintenance = this.facilities.length * 1 * (deltaTime / 3600); // $1 per facility per hour
+    const utilities = Math.max(50, this.visitors.length * 0.1) * (deltaTime / 3600); // Utilities scale with visitors
 
-    // Park entrance fees
-    const entranceFees = this.visitors.length * 0.1 * (deltaTime / 3600); // Small entrance fee
-
-    this.stats.money += rideIncome + entranceFees - staffCosts - maintenanceCosts;
+    // Apply income and expenses
+    const totalIncome = rideIncome + facilityIncome + entranceFees;
+    const totalExpenses = staffCosts + rideMaintenance + facilityMaintenance + utilities;
+    
+    this.stats.money += totalIncome - totalExpenses;
+    this.monthlyIncome += totalIncome;
+    this.monthlyExpenses += totalExpenses;
+    
+    // Ensure money doesn't go below 0
+    this.stats.money = Math.max(0, this.stats.money);
   }
 
   private updateVisitors(deltaTime: number): void {
-    // Simulate visitor arrivals based on park reputation
-    const arrivalRate = Math.max(0, (this.stats.reputation / 1000) * 10); // Base arrival rate
-    const newVisitors = Math.floor(arrivalRate * deltaTime);
-    
-    for (let i = 0; i < newVisitors; i++) {
-      if (this.visitors.length < 500) { // Park capacity limit
-        this.spawnVisitor();
-      }
-    }
-
     // Update existing visitors
     this.visitors.forEach(visitor => {
       visitor.update(deltaTime);
