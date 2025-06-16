@@ -133,15 +133,20 @@ body {
 
 /* Game UI specific styles - can be expanded */
 #game-container {
+    position: relative;
     width: 100vw;
     height: 100vh;
-    position: relative; /* For positioning game-ui over canvas */
+    background: #000;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 #renderCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    display: block; /* Remove extra space below canvas */
+    z-index: 1;
 }
 
 #game-ui {
@@ -219,13 +224,140 @@ body {
 
 #message-display {
     position: absolute;
-    bottom: 10px;
-    right: 10px;
-    background-color: rgba(44, 62, 80, 0.9); /* Darker, more opaque */
-    color: #ecf0f1;
-    padding: 12px 18px;
-    border-radius: 6px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    max-width: 300px;
-    font-size: 0.95em;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 300;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    display: none;
+}
+
+/* OpenRCT2-Style Game Interface */
+/*#game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#renderCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+/* Top Toolbar */
+/*#top-toolbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50px;
+    background: linear-gradient(to bottom, #d4d4d4, #a8a8a8);
+    border-bottom: 2px solid #808080;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 10px;
+    z-index: 100;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+.toolbar-group {
+    display: flex;
+    gap: 2px;
+    padding: 0 5px;
+    border-right: 1px solid #999;
+}
+
+.toolbar-group:last-child {
+    border-right: none;
+}
+
+.toolbar-btn {
+    width: 32px;
+    height: 32px;
+    border: 1px outset #c0c0c0;
+    background: linear-gradient(to bottom, #e0e0e0, #c0c0c0);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.1s ease;
+}
+
+.toolbar-btn:hover {
+    background: linear-gradient(to bottom, #f0f0f0, #d0d0d0);
+    border-color: #a0a0a0;
+}
+
+.toolbar-btn:active,
+.toolbar-btn.active {
+    border: 1px inset #c0c0c0;
+    background: linear-gradient(to bottom, #c0c0c0, #e0e0e0);
+}
+
+/* Bottom UI */
+/*#bottom-ui {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: linear-gradient(to bottom, #d4d4d4, #a8a8a8);
+    border-top: 2px solid #808080;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+}
+
+#park-stats {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.stat-label {
+    color: #333;
+}
+
+.stat-item span:last-child {
+    color: #000;
+    background: rgba(255,255,255,0.7);
+    padding: 1px 4px;
+    border: 1px inset #c0c0c0;
+    min-width: 50px;
+    text-align: center;
+}
+
+/* Modal Container */
+/*#modal-container {
+    position: absolute;
+    top: 50px;
+    left: 0;
+    right: 0;
+    bottom: 40px;
+    z-index: 200;
+    pointer-events: none;
+}
+
+#modal-container > * {
+    pointer-events: auto;
 }

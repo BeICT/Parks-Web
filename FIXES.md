@@ -61,6 +61,33 @@ All TypeScript compilation errors have been resolved and the project now builds 
 - **Fix**: Changed output to `public/dist/bundle.js` to match HTML reference
 - **Files**: `webpack.config.js`
 
+## Runtime Issues Fixed (Part 2)
+
+### 12. **Asset Loading Runtime Errors**
+- **Problem**: Trying to load texture files that don't exist (`grassTexture`, `pathTexture`)
+- **Fix**: Removed non-existent texture files from asset configs since we use procedural textures
+- **Files**: `src/utils/AssetLoader.ts`
+
+### 13. **Scene Texture Reference Error**
+- **Problem**: Scene was looking for `default-grass` asset instead of `grass-texture`  
+- **Fix**: Updated asset reference to match procedural texture name
+- **Files**: `src/game/Scene.ts`
+
+### 14. **GameUI HTML Element Mismatch**
+- **Problem**: GameUI was looking for HTML elements with wrong IDs
+- **Fix**: Updated GameUI to match actual HTML element IDs in index.html
+- **Files**: `src/ui/GameUI.ts`
+
+### 15. **GameUI Show Method Error**
+- **Problem**: Trying to access non-existent elements causing null reference errors
+- **Fix**: Added null checks and updated to use correct HTML structure
+- **Files**: `src/ui/GameUI.ts`
+
+### 16. **Event Listener Setup**
+- **Problem**: Complex element mapping causing errors
+- **Fix**: Simplified event listener setup to target specific buttons
+- **Files**: `src/ui/GameUI.ts`
+
 ## Current Status
 
 ✅ **All TypeScript errors resolved**  

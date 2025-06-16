@@ -39,25 +39,72 @@
 
     <div id="game-container" class="hidden">
         <canvas id="renderCanvas"></canvas>
-        <div id="game-ui" class="hidden">
-            <div id="stats-panel">
-                <div>Money: <span id="money-stat">$50000</span></div>
-                <div>Visitors: <span id="visitors-stat">0</span></div>
-                <div>Happiness: <span id="happiness-stat">100%</span></div>
-                <div>Reputation: <span id="reputation-stat">50</span></div>
+        
+        <!-- Top Toolbar - OpenRCT2 Style -->
+        <div id="top-toolbar">
+            <!-- Group 1: Game Control -->
+            <div class="toolbar-group">
+                <button id="pause-btn" class="toolbar-btn" title="Pause Game">⏸️</button>
+                <button id="fast-forward-btn" class="toolbar-btn" title="Fast Forward">⏩</button>
+                <button id="file-options-btn" class="toolbar-btn" title="File Options">💾</button>
             </div>
-            <div id="controls-panel">
-                <button id="build-ride-btn">Build Ride</button>
-                <button id="bulldoze-btn">Bulldoze</button>
-                <button id="toggle-grid-btn">Toggle Grid</button>
-                <button id="main-menu-return-btn">Main Menu</button>
+            
+            <!-- Group 2: View Options -->
+            <div class="toolbar-group">
+                <button id="zoom-out-btn" class="toolbar-btn" title="Zoom Out">🔍➖</button>
+                <button id="zoom-in-btn" class="toolbar-btn" title="Zoom In">🔍➕</button>
+                <button id="rotate-view-btn" class="toolbar-btn" title="Rotate View">🔄</button>
+                <button id="view-options-btn" class="toolbar-btn" title="View Options">👁️</button>
+                <button id="map-btn" class="toolbar-btn" title="Map">🗺️</button>
             </div>
-            <div id="build-tools" class="hidden">
-                <h4>Build Tools</h4>
-                <!-- Ride options will be populated here -->
+            
+            <!-- Group 3: Construction Tools -->
+            <div class="toolbar-group">
+                <button id="clear-scenery-btn" class="toolbar-btn" title="Clear Scenery">🧹</button>
+                <button id="land-tool-btn" class="toolbar-btn" title="Land Tool">🌍</button>
+                <button id="water-tool-btn" class="toolbar-btn" title="Water Tool">💧</button>
+                <button id="scenery-btn" class="toolbar-btn" title="Scenery">🌳</button>
+                <button id="footpath-btn" class="toolbar-btn" title="Footpaths">🛤️</button>
+                <button id="new-rides-btn" class="toolbar-btn" title="New Rides">🎢</button>
             </div>
-            <div id="message-display"></div>
+            
+            <!-- Group 4: Management -->
+            <div class="toolbar-group">
+                <button id="finances-btn" class="toolbar-btn" title="Finances">💰</button>
+                <button id="research-btn" class="toolbar-btn" title="Research">🔬</button>
+                <button id="rides-list-btn" class="toolbar-btn" title="Rides List">📋</button>
+                <button id="park-window-btn" class="toolbar-btn" title="Park Info">🏰</button>
+                <button id="staff-btn" class="toolbar-btn" title="Staff">👷</button>
+                <button id="guests-btn" class="toolbar-btn" title="Guests">👥</button>
+            </div>
         </div>
+        
+        <!-- Bottom UI -->
+        <div id="bottom-ui">
+            <!-- Park Stats -->
+            <div id="park-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Cash:</span>
+                    <span id="cash-display">$50,000</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Guests:</span>
+                    <span id="guests-display">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Park Rating:</span>
+                    <span id="rating-display">500</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Date:</span>
+                    <span id="date-display">Oct Year 1</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Windows -->
+        <div id="modal-container"></div>
+        <div id="message-display"></div>
     </div>
 
     <script src="dist/bundle.js"></script>
