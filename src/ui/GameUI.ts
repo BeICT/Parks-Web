@@ -2,17 +2,20 @@ import { GameStats, BuildTool, AssetConfig } from '../types';
 import { EventManager } from '../utils/EventManager';
 import { ToolbarUI } from './ToolbarUI';
 import { BottomUI } from './BottomUI';
+import { ModalManager } from './ModalManager';
 
 export class GameUI {
   private eventManager: EventManager;
   private toolbarUI: ToolbarUI;
   private bottomUI: BottomUI;
+  private modalManager: ModalManager;
   private isVisible: boolean = false;
 
   constructor(eventManager: EventManager) {
     this.eventManager = eventManager;
     this.toolbarUI = new ToolbarUI(eventManager);
     this.bottomUI = new BottomUI(eventManager);
+    this.modalManager = new ModalManager(eventManager);
     this.setupEventListeners();
   }
 

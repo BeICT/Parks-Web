@@ -8,16 +8,22 @@ export class Park {
   public rides: Ride[] = [];
   public visitors: Visitor[] = [];
   public size: { width: number; height: number };
+  private lastUpdateTime: number = 0;
+  private gameDate: Date;
+  private gameSpeed: number = 1;
+  private isPaused: boolean = false;
 
   constructor(name: string = 'My Amazing Park') {
     this.name = name;
     this.stats = {
       money: 50000,
       visitors: 0,
-      happiness: 100,
-      reputation: 50
+      happiness: 75,
+      reputation: 500
     };
     this.size = { width: 100, height: 100 };
+    this.gameDate = new Date(1, 9, 1); // October Year 1
+    this.lastUpdateTime = Date.now();
   }
 
   public addRide(ride: Ride): boolean {
@@ -55,79 +61,142 @@ export class Park {
   }
 
   public update(deltaTime: number): void {
-    this.rides.forEach(ride => ride.update(deltaTime));
-    this.visitors.forEach(visitor => visitor.update(deltaTime));
+    if (this.isPaused) return;
+
+    const currentTime = Date.now();
+    const realDeltaTime = (currentTime - this.lastUpdateTime) / 1000;
+    this.lastUpdateTime = currentTime;
+
+    // Update game time (accelerated)
+    const gameTimeStep = realDeltaTime * this.gameSpeed * 60; // 1 real second = 1 game minute at normal speed
+    this.gameDate = new Date(this.gameDate.getTime() + gameTimeStep * 1000);
+
+    // Update park economics
+    this.updateEconomics(realDeltaTime * this.gameSpeed);
     
-    // Remove visitors who want to leave
-    this.visitors = this.visitors.filter(visitor => visitor.isInPark);
+    // Update visitor simulation
+    this.updateVisitors(realDeltaTime * this.gameSpeed);
+    
+    // Update rides
+    this.updateRides(realDeltaTime * this.gameSpeed);
+    
+    // Random events (very rare)
+    if (Math.random() < 0.0001 * realDeltaTime) {
+      this.triggerRandomEvent();
+    }
+  }
+
+  private updateEconomics(deltaTime: number): void {
+    // Income from rides
+    let rideIncome = 0;
+    this.rides.forEach(ride => {
+      if (ride.isOperational) {
+        rideIncome += ride.ticketPrice * ride.ridersPerHour * (deltaTime / 3600);
+      }
+    });
+
+    // Operating costs
+    const staffCosts = this.rides.length * 5 * (deltaTime / 3600); // $5 per ride per hour
+    const maintenanceCosts = this.rides.length * 2 * (deltaTime / 3600); // $2 per ride per hour
+
+    // Park entrance fees
+    const entranceFees = this.visitors.length * 0.1 * (deltaTime / 3600); // Small entrance fee
+
+    this.stats.money += rideIncome + entranceFees - staffCosts - maintenanceCosts;
+  }
+
+  private updateVisitors(deltaTime: number): void {
+    // Simulate visitor arrivals based on park reputation
+    const arrivalRate = Math.max(0, (this.stats.reputation / 1000) * 10); // Base arrival rate
+    const newVisitors = Math.floor(arrivalRate * deltaTime);
+    
+    for (let i = 0; i < newVisitors; i++) {
+      if (this.visitors.length < 500) { // Park capacity limit
+        this.spawnVisitor();
+      }
+    }
+
+    // Update existing visitors
+    this.visitors.forEach(visitor => {
+      visitor.update(deltaTime);
+    });
+
+    // Remove visitors who are leaving
+    this.visitors = this.visitors.filter(visitor => !visitor.isLeaving);
     this.stats.visitors = this.visitors.length;
-    
-    this.updateHappiness();
-    this.generateIncome(deltaTime);
-    this.payMaintenanceCosts(deltaTime);
-    this.spawnVisitors(deltaTime);
-  }
 
-  private updateHappiness(): void {
-    if (this.visitors.length === 0) {
-      this.stats.happiness = 75;
-      return;
-    }
-
-    const totalHappiness = this.visitors.reduce((sum, visitor) => sum + visitor.happiness, 0);
-    this.stats.happiness = Math.round(totalHappiness / this.visitors.length);
-  }
-
-  private generateIncome(deltaTime: number): void {
-    const income = this.rides.reduce((total, ride) => {
-      return total + (ride.isOperating ? ride.ticketPrice * ride.currentRiders * deltaTime / 60 : 0);
-    }, 0);
-    
-    this.stats.money += Math.round(income);
-  }
-
-  private payMaintenanceCosts(deltaTime: number): void {
-    const totalMaintenance = this.rides.reduce((total, ride) => {
-      return total + ride.cost.maintenance;
-    }, 0);
-    
-    this.stats.money -= Math.round(totalMaintenance * deltaTime / 60);
-  }
-
-  private spawnVisitors(deltaTime: number): void {
-    const maxVisitors = 200;
-    if (this.visitors.length >= maxVisitors) return;
-    
-    const spawnRate = Math.max(0.1, (this.stats.reputation + this.stats.happiness) / 2000);
-    const shouldSpawn = Math.random() < spawnRate * deltaTime;
-    
-    if (shouldSpawn) {
-      const visitor = new Visitor(`visitor_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
-      visitor.position = { x: 0, y: 0, z: -40 };
-      this.addVisitor(visitor);
+    // Update happiness based on visitor satisfaction
+    if (this.visitors.length > 0) {
+      const avgHappiness = this.visitors.reduce((sum, v) => sum + v.happiness, 0) / this.visitors.length;
+      this.stats.happiness = Math.round(avgHappiness);
     }
   }
 
-  private updateReputation(change: number): void {
-    this.stats.reputation = Math.max(0, Math.min(100, this.stats.reputation + change));
+  private updateRides(deltaTime: number): void {
+    this.rides.forEach(ride => {
+      ride.update(deltaTime);
+      
+      // Random breakdowns
+      if (Math.random() < 0.001 * deltaTime && ride.isOperational) {
+        ride.breakdown();
+        console.log(`${ride.name} has broken down!`);
+      }
+    });
   }
 
-  public getRideAt(position: Position): Ride | null {
-    return this.rides.find(ride => {
-      const distance = Math.sqrt(
-        Math.pow(ride.position.x - position.x, 2) + 
-        Math.pow(ride.position.z - position.z, 2)
-      );
-      return distance < 10;
-    }) || null;
+  private spawnVisitor(): void {
+    const visitor = new Visitor(
+      `Guest ${Math.floor(Math.random() * 9999)}`,
+      Math.floor(Math.random() * 60) + 10, // Age 10-69
+      { x: 0, y: 0, z: -90 } // Start at park entrance
+    );
+    this.addVisitor(visitor);
   }
 
-  public canBuildAt(position: Position): boolean {
-    if (position.x < -this.size.width/2 || position.x > this.size.width/2 || 
-        position.z < -this.size.height/2 || position.z > this.size.height/2) {
-      return false;
-    }
+  private triggerRandomEvent(): void {
+    const events = [
+      () => {
+        this.stats.money += 1000;
+        console.log('Random event: Local newspaper featured your park! +$1000');
+      },
+      () => {
+        this.updateReputation(10);
+        console.log('Random event: Celebrity visited your park! +10 reputation');
+      },
+      () => {
+        if (this.rides.length > 0) {
+          const ride = this.rides[Math.floor(Math.random() * this.rides.length)];
+          ride.breakdown();
+          console.log(`Random event: ${ride.name} experienced technical difficulties!`);
+        }
+      }
+    ];
+    
+    const event = events[Math.floor(Math.random() * events.length)];
+    event();
+  }
 
-    return !this.getRideAt(position);
+  public setPaused(paused: boolean): void {
+    this.isPaused = paused;
+  }
+
+  public setGameSpeed(speed: number): void {
+    this.gameSpeed = Math.max(1, Math.min(4, speed));
+  }
+
+  public getFormattedDate(): string {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${months[this.gameDate.getMonth()]} Year ${this.gameDate.getFullYear()}`;
+  }
+
+  public updateReputation(change: number): void {
+    this.stats.reputation = Math.max(0, Math.min(1000, this.stats.reputation + change));
+  }
+
+  public getFormattedTime(): string {
+    const hours = this.gameDate.getHours();
+    const minutes = this.gameDate.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
   }
 }

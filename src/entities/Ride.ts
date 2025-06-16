@@ -13,6 +13,8 @@ export default class Ride {
   public intensity: number;
   public nausea: number;
   public isOperating: boolean = false;
+  public isOperational: boolean = true;
+  public ridersPerHour: number = 0;
   public currentRiders: number = 0;
   public rideTime: number;
   public currentTime: number = 0;
@@ -30,6 +32,7 @@ export default class Ride {
     this.nausea = config.nausea;
     this.rideTime = this.calculateRideTime();
     this.ticketPrice = this.calculateTicketPrice();
+    this.calculateRidersPerHour();
   }
 
   private calculateRideTime(): number {
@@ -47,10 +50,34 @@ export default class Ride {
     return Math.max(1, Math.round((this.excitement + this.intensity) / 2));
   }
 
+  public breakdown(): void {
+    this.isOperational = false;
+    this.isOperating = false;
+    console.log(`${this.name} has broken down and needs maintenance!`);
+  }
+
+  public repair(): void {
+    this.isOperational = true;
+    console.log(`${this.name} has been repaired and is operational again.`);
+  }
+
+  private calculateRidersPerHour(): void {
+    if (this.isOperational && this.isOperating) {
+      // Base calculation: capacity * cycles per hour
+      const cyclesPerHour = 3600 / this.rideTime;
+      this.ridersPerHour = Math.floor(this.capacity * cyclesPerHour * 0.8); // 80% efficiency
+    } else {
+      this.ridersPerHour = 0;
+    }
+  }
+
   public update(deltaTime: number): void {
     if (!this.isOperating) return;
 
     this.currentTime += deltaTime;
+    
+    // Recalculate riders per hour periodically
+    this.calculateRidersPerHour();
 
     if (this.currentTime >= this.rideTime) {
       this.currentTime = 0;

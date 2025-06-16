@@ -3,6 +3,7 @@ import { Position, VisitorNeed } from '../types';
 export class Visitor {
   public id: string;
   public name: string;
+  public age: number;
   public position: Position;
   public targetPosition: Position | null = null;
   public happiness: number = 100;
@@ -10,13 +11,15 @@ export class Visitor {
   public needs: VisitorNeed;
   public currentRide: string | null = null;
   public isInPark: boolean = true;
+  public isLeaving: boolean = false;
   public visitTime: number = 0;
   private speed: number = 2;
 
-  constructor(id: string) {
-    this.id = id;
-    this.name = this.generateRandomName();
-    this.position = { x: 0, y: 0, z: 0 };
+  constructor(name: string, age: number, position: Position) {
+    this.id = `visitor_${Date.now()}_${Math.random()}`;
+    this.name = name;
+    this.age = age;
+    this.position = position;
     this.money = Math.random() * 100 + 50;
     this.needs = {
       hunger: 100,
@@ -90,6 +93,12 @@ export class Visitor {
   }
 
   private updateBehavior(): void {
+    // Decide if visitor should leave
+    if (this.visitTime > 3600 || this.happiness < 30 || this.money < 10) {
+      this.isLeaving = true;
+      this.isInPark = false;
+    }
+    
     if (this.targetPosition || this.currentRide) return;
     
     const urgentNeed = this.getMostUrgentNeed();

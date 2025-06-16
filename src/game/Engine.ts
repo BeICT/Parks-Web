@@ -121,11 +121,134 @@ export class Engine {
       console.log('Clicked on:', intersection.object.name || 'unnamed object');
       console.log('Position:', intersection.point);
       
+      // Handle building based on current tool
+      this.handleBuildAction(intersection.point);
+      
       // Emit click event for other systems to handle
       this.eventManager.emit('terrain-click', {
         position: intersection.point,
         object: intersection.object
       });
+    }
+  }
+
+  private handleBuildAction(position: THREE.Vector3): void {
+    switch (this.currentTool) {
+      case BuildTool.RIDE:
+        this.buildRide(position);
+        break;
+      case BuildTool.SHOP:
+        this.buildShop(position);
+        break;
+      case BuildTool.PATH:
+        this.buildPath(position);
+        break;
+      case BuildTool.DECORATION:
+        this.buildDecoration(position);
+        break;
+      case BuildTool.DELETE:
+        this.deleteObject(position);
+        break;
+      default:
+        console.log('No tool selected');
+    }
+  }
+
+  private buildRide(position: THREE.Vector3): void {
+    console.log('Building ride at:', position);
+    
+    // Create a simple ride placeholder
+    const rideGeometry = new THREE.CylinderGeometry(5, 5, 8);
+    const rideMaterial = new THREE.MeshLambertMaterial({ color: 0xFF6B6B });
+    const rideMesh = new THREE.Mesh(rideGeometry, rideMaterial);
+    
+    rideMesh.position.set(position.x, 4, position.z);
+    rideMesh.name = `ride_${Date.now()}`;
+    rideMesh.castShadow = true;
+    
+    this.scene.addObject(rideMesh);
+    
+    // Add to park (simplified)
+    // In a real implementation, this would create a proper Ride entity
+    console.log('Ride built successfully!');
+  }
+
+  private buildShop(position: THREE.Vector3): void {
+    console.log('Building shop at:', position);
+    
+    const shopGeometry = new THREE.BoxGeometry(3, 3, 3);
+    const shopMaterial = new THREE.MeshLambertMaterial({ color: 0x4ECDC4 });
+    const shopMesh = new THREE.Mesh(shopGeometry, shopMaterial);
+    
+    shopMesh.position.set(position.x, 1.5, position.z);
+    shopMesh.name = `shop_${Date.now()}`;
+    shopMesh.castShadow = true;
+    
+    this.scene.addObject(shopMesh);
+    console.log('Shop built successfully!');
+  }
+
+  private buildPath(position: THREE.Vector3): void {
+    console.log('Building path at:', position);
+    
+    const pathGeometry = new THREE.BoxGeometry(2, 0.1, 2);
+    const pathMaterial = new THREE.MeshLambertMaterial({ color: 0x8B7355 });
+    const pathMesh = new THREE.Mesh(pathGeometry, pathMaterial);
+    
+    pathMesh.position.set(position.x, 0.05, position.z);
+    pathMesh.name = `path_${Date.now()}`;
+    pathMesh.receiveShadow = true;
+    
+    this.scene.addObject(pathMesh);
+    console.log('Path built successfully!');
+  }
+
+  private buildDecoration(position: THREE.Vector3): void {
+    console.log('Building decoration at:', position);
+    
+    // Random decoration
+    const decorations = [
+      () => {
+        const treeGeometry = new THREE.ConeGeometry(1, 4, 8);
+        const treeMaterial = new THREE.MeshLambertMaterial({ color: 0x228B22 });
+        return new THREE.Mesh(treeGeometry, treeMaterial);
+      },
+      () => {
+        const benchGeometry = new THREE.BoxGeometry(2, 0.5, 0.5);
+        const benchMaterial = new THREE.MeshLambertMaterial({ color: 0x8B4513 });
+        return new THREE.Mesh(benchGeometry, benchMaterial);
+      }
+    ];
+    
+    const decoration = decorations[Math.floor(Math.random() * decorations.length)]();
+    decoration.position.set(position.x, 1, position.z);
+    decoration.name = `decoration_${Date.now()}`;
+    decoration.castShadow = true;
+    
+    this.scene.addObject(decoration);
+    console.log('Decoration built successfully!');
+  }
+
+  private deleteObject(position: THREE.Vector3): void {
+    console.log('Deleting object at:', position);
+    
+    // Find objects near the click position
+    const objectsToDelete = this.scene.getScene().children.filter(obj => {
+      if (obj.name.startsWith('ride_') || obj.name.startsWith('shop_') || 
+          obj.name.startsWith('path_') || obj.name.startsWith('decoration_')) {
+        const distance = obj.position.distanceTo(position);
+        return distance < 5; // Within 5 units
+      }
+      return false;
+    });
+    
+    objectsToDelete.forEach(obj => {
+      this.scene.removeObject(obj);
+      console.log('Deleted:', obj.name);
+    });
+    
+    if (objectsToDelete.length === 0) {
+      console.log('No objects found to delete');
     }
   }
 
@@ -150,10 +273,12 @@ export class Engine {
       } else {
         this.resume();
       }
+      this.park.setPaused(isPaused);
     });
 
     this.eventManager.on('game-speed', (speed: number) => {
       this.setGameSpeed(speed);
+      this.park.setGameSpeed(speed);
     });
 
     // Tool selection
@@ -262,6 +387,18 @@ export class Engine {
     };
 
     this.eventManager.emit('statsUpdated', stats);
+    
+    // Emit game date update
+    this.eventManager.emit('game-date-changed', this.park.getFormattedDate());
+    
+    // Emit game state update
+    const gameState = {
+      isPaused: this.isPaused,
+      gameSpeed: this.gameSpeed,
+      currentTool: this.currentTool,
+      currentDate: new Date()
+    };
+    this.eventManager.emit('gameStateChanged', gameState);
   }
 
   public setPark(park: Park): void {
