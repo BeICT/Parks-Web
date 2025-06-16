@@ -2,64 +2,156 @@ import * as THREE from 'three';
 import Ride from '@/entities/Ride';
 import { Visitor } from '@/entities/Visitor';
 import { Position } from '@/types';
+import { AssetLoader } from '@/utils/AssetLoader';
 
 export class Scene {
   private scene: THREE.Scene;
   private rideObjects: Map<string, THREE.Object3D> = new Map();
   private visitorObjects: Map<string, THREE.Object3D> = new Map();
   private pathObjects: THREE.Object3D[] = [];
+  private assetLoader: AssetLoader;
 
-  constructor() {
+  constructor(assetLoader: AssetLoader) {
     this.scene = new THREE.Scene();
+    this.assetLoader = assetLoader;
   }
 
-  public initialize(): void {
+  public async initialize(): Promise<void> {
+    // Set up basic scene
+    this.scene.background = new THREE.Color(0x87CEEB);
+    this.scene.fog = new THREE.Fog(0x87CEEB, 50, 200);
+
+    // Add lighting
     this.setupLighting();
-    this.createGround();
-    this.createSkybox();
+
+    // Create terrain
+    this.createTerrain();
+
+    // Add some basic scenery
+    this.addBasicScenery();
+
+    console.log('Scene initialized');
   }
 
   private setupLighting(): void {
     // Ambient light
-    const ambientLight = new THREE.AmbientLight(0x404040, 0.4);
+    const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
     this.scene.add(ambientLight);
 
     // Directional light (sun)
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
     directionalLight.position.set(50, 100, 50);
     directionalLight.castShadow = true;
+    
+    // Configure shadow properties
     directionalLight.shadow.mapSize.width = 2048;
     directionalLight.shadow.mapSize.height = 2048;
     directionalLight.shadow.camera.near = 0.5;
-    directionalLight.shadow.camera.far = 500;
-    directionalLight.shadow.camera.left = -100;
-    directionalLight.shadow.camera.right = 100;
-    directionalLight.shadow.camera.top = 100;
-    directionalLight.shadow.camera.bottom = -100;
+    directionalLight.shadow.camera.far = 200;
+    directionalLight.shadow.camera.left = -50;
+    directionalLight.shadow.camera.right = 50;
+    directionalLight.shadow.camera.top = 50;
+    directionalLight.shadow.camera.bottom = -50;
+
     this.scene.add(directionalLight);
   }
 
-  private createGround(): void {
-    const groundGeometry = new THREE.PlaneGeometry(200, 200);
-    const groundMaterial = new THREE.MeshLambertMaterial({ color: 0x4a7c59 });
+  private createTerrain(): void {
+    // Create a simple ground plane
+    const groundGeometry = new THREE.PlaneGeometry(200, 200, 50, 50);
+    
+    // Get or create a grass texture
+    const grassTexture = this.assetLoader.getAsset('default-grass');
+    if (grassTexture && grassTexture instanceof THREE.Texture) {
+      grassTexture.wrapS = THREE.RepeatWrapping;
+      grassTexture.wrapT = THREE.RepeatWrapping;
+      grassTexture.repeat.set(20, 20);
+    }
+
+    const groundMaterial = new THREE.MeshLambertMaterial({ 
+      color: 0x4a7c59,
+      map: grassTexture
+    });
+    
     const ground = new THREE.Mesh(groundGeometry, groundMaterial);
     ground.rotation.x = -Math.PI / 2;
     ground.receiveShadow = true;
+    ground.name = 'terrain';
+    
     this.scene.add(ground);
-
-    // Add some grid lines
-    const gridHelper = new THREE.GridHelper(200, 20, 0x888888, 0x444444);
-    this.scene.add(gridHelper);
   }
 
-  private createSkybox(): void {
-    const skyGeometry = new THREE.SphereGeometry(1000, 32, 32);
-    const skyMaterial = new THREE.MeshBasicMaterial({
-      color: 0x87CEEB,
-      side: THREE.BackSide
-    });
-    const sky = new THREE.Mesh(skyGeometry, skyMaterial);
-    this.scene.add(sky);
+  private addBasicScenery(): void {
+    // Add some trees
+    this.addTrees();
+    
+    // Add park entrance
+    this.addParkEntrance();
+  }
+
+  private addTrees(): void {
+    const treeGeometry = new THREE.ConeGeometry(2, 8, 8);
+    const treeMaterial = new THREE.MeshLambertMaterial({ color: 0x228B22 });
+    
+    const trunkGeometry = new THREE.CylinderGeometry(0.5, 0.7, 3);
+    const trunkMaterial = new THREE.MeshLambertMaterial({ color: 0x8B4513 });
+
+    // Place trees randomly around the park
+    for (let i = 0; i < 20; i++) {
+      const tree = new THREE.Group();
+      tree.name = `tree_${i}`;
+      
+      // Trunk
+      const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+      trunk.position.y = 1.5;
+      trunk.castShadow = true;
+      tree.add(trunk);
+      
+      // Leaves
+      const leaves = new THREE.Mesh(treeGeometry, treeMaterial);
+      leaves.position.y = 5;
+      leaves.castShadow = true;
+      tree.add(leaves);
+      
+      // Random position
+      tree.position.x = (Math.random() - 0.5) * 180;
+      tree.position.z = (Math.random() - 0.5) * 180;
+      
+      // Avoid placing trees in the center
+      if (Math.abs(tree.position.x) < 20 && Math.abs(tree.position.z) < 20) {
+        continue;
+      }
+      
+      this.scene.add(tree);
+    }
+  }
+
+  private addParkEntrance(): void {
+    // Simple entrance gate
+    const gateGeometry = new THREE.BoxGeometry(2, 6, 0.5);
+    const gateMaterial = new THREE.MeshLambertMaterial({ color: 0x8B4513 });
+    
+    const leftGate = new THREE.Mesh(gateGeometry, gateMaterial);
+    leftGate.position.set(-3, 3, -90);
+    leftGate.castShadow = true;
+    leftGate.name = 'entrance_left';
+    this.scene.add(leftGate);
+    
+    const rightGate = new THREE.Mesh(gateGeometry, gateMaterial);
+    rightGate.position.set(3, 3, -90);
+    rightGate.castShadow = true;
+    rightGate.name = 'entrance_right';
+    this.scene.add(rightGate);
+    
+    // Entrance sign
+    const signGeometry = new THREE.BoxGeometry(8, 2, 0.2);
+    const signMaterial = new THREE.MeshLambertMaterial({ color: 0xDEB887 });
+    
+    const sign = new THREE.Mesh(signGeometry, signMaterial);
+    sign.position.set(0, 7, -90);
+    sign.castShadow = true;
+    sign.name = 'entrance_sign';
+    this.scene.add(sign);
   }
 
   public addRide(ride: Ride): void {
@@ -309,17 +401,50 @@ export class Scene {
       // Simple rotation animation
       rideObject.rotation.y += deltaTime * 0.5;
     });
+
+    // Animate scene elements if needed
+    // For example, rotate trees slightly for a breeze effect
+    this.scene.children.forEach(child => {
+      if (child.name.startsWith('tree_')) {
+        child.rotation.y += Math.sin(Date.now() * 0.001) * 0.001;
+      }
+    });
   }
 
   public getScene(): THREE.Scene {
     return this.scene;
   }
 
+  public addObject(object: THREE.Object3D): void {
+    this.scene.add(object);
+  }
+
+  public removeObject(object: THREE.Object3D): void {
+    this.scene.remove(object);
+  }
+
   public dispose(): void {
-    // Clean up resources
-    this.scene.clear();
-    this.rideObjects.clear();
-    this.visitorObjects.clear();
-    this.pathObjects.length = 0;
+    // Dispose of geometries and materials
+    this.scene.traverse((object) => {
+      if (object instanceof THREE.Mesh) {
+        if (object.geometry) {
+          object.geometry.dispose();
+        }
+        if (object.material) {
+          if (Array.isArray(object.material)) {
+            object.material.forEach(material => material.dispose());
+          } else {
+            object.material.dispose();
+          }
+        }
+      }
+    });
+
+    // Clear the scene
+    while (this.scene.children.length > 0) {
+      this.scene.remove(this.scene.children[0]);
+    }
+
+    console.log('Scene disposed');
   }
 }

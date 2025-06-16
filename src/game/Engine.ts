@@ -1,238 +1,240 @@
 import * as THREE from 'three';
 import { Scene } from './Scene';
 import { Camera } from './Camera';
-import { Park } from '@/entities/Park';
-import Ride from '@/entities/Ride';
-import { GameState, BuildTool, Position } from '@/types';
+import { AssetLoader } from '@/utils/AssetLoader';
 import { EventManager } from '@/utils/EventManager';
+import { Park } from '@/entities/Park';
+import { GameStats } from '@/types';
 
 export class Engine {
-  private renderer: THREE.WebGLRenderer;
   private scene: Scene;
   private camera: Camera;
-  private park: Park;
-  private gameState: GameState = GameState.MENU;
-  private currentTool: BuildTool = BuildTool.NONE;
+  private renderer: THREE.WebGLRenderer;
+  private assetLoader: AssetLoader;
   private eventManager: EventManager;
+  private park: Park;
+  private animationId: number | null = null;
   private lastTime: number = 0;
-  private gameSpeed: number = 1;
+  private isPaused: boolean = false;
+  private keys: { [key: string]: boolean } = {};
 
-  constructor(container: HTMLElement) {
-    this.eventManager = new EventManager();
-    this.setupRenderer(container);
-    this.scene = new Scene();
-    this.camera = new Camera(container);
-    this.park = new Park();
+  constructor(canvas: HTMLCanvasElement, assetLoader: AssetLoader, eventManager: EventManager) {
+    this.assetLoader = assetLoader;
+    this.eventManager = eventManager;
     
-    this.setupEventListeners();
+    // Initialize renderer
+    this.renderer = new THREE.WebGLRenderer({ 
+      canvas: canvas,
+      antialias: true,
+      alpha: true
+    });
+    this.renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer.setClearColor(0x87CEEB, 1);
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    // Initialize camera
+    this.camera = new Camera(canvas.parentElement || document.body);
+
+    // Initialize scene
+    this.scene = new Scene(this.assetLoader);
+
+    // Initialize park
+    this.park = new Park();
+
+    // Setup controls
     this.setupControls();
   }
 
-  private setupRenderer(container: HTMLElement): void {
-    this.renderer = new THREE.WebGLRenderer({ antialias: true });
-    this.renderer.setSize(container.clientWidth, container.clientHeight);
-    this.renderer.setClearColor(0x87CEEB); // Sky blue
-    this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    
-    container.appendChild(this.renderer.domElement);
-    
-    // Handle window resize
-    window.addEventListener('resize', () => {
-      this.camera.handleResize();
-      this.renderer.setSize(container.clientWidth, container.clientHeight);
-    });
-  }
-
-  private setupEventListeners(): void {
-    // Mouse click handling for building
-    this.renderer.domElement.addEventListener('click', (event: MouseEvent) => {
-      if (this.gameState !== GameState.PLAYING) return;
+  public async initialize(): Promise<void> {
+    try {
+      // Initialize scene
+      await this.scene.initialize();
       
-      const position = this.getWorldPositionFromMouse(event);
-      this.handleBuildAction(position);
-    });
-
-    // Tool selection
-    this.eventManager.on('tool-selected', (tool: BuildTool) => {
-      this.currentTool = tool;
-      this.updateCursor();
-    });
-
-    // Game state changes
-    this.eventManager.on('game-state-change', (state: GameState) => {
-      this.gameState = state;
-    });
+      // Setup camera controls
+      this.camera.setupMovementControls(this.keys);
+      
+      // Start render loop
+      this.start();
+      
+      console.log('Engine initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize engine:', error);
+      throw error;
+    }
   }
 
   private setupControls(): void {
-    // Add WASD camera movement
-    const keys: { [key: string]: boolean } = {};
-    
+    // Keyboard event listeners
     window.addEventListener('keydown', (event) => {
-      keys[event.code] = true;
+      this.keys[event.code] = true;
     });
-    
+
     window.addEventListener('keyup', (event) => {
-      keys[event.code] = false;
+      this.keys[event.code] = false;
     });
 
-    // Camera movement update (called in game loop)
-    this.camera.setupMovementControls(keys);
+    // Mouse event listeners for interaction
+    this.renderer.domElement.addEventListener('click', (event) => {
+      this.handleClick(event);
+    });
+
+    // Prevent context menu on right click
+    this.renderer.domElement.addEventListener('contextmenu', (event) => {
+      event.preventDefault();
+    });
   }
 
-  private getWorldPositionFromMouse(event: MouseEvent): Position {
+  private handleClick(event: MouseEvent): void {
+    // Basic click handling - could be expanded for building placement
     const rect = this.renderer.domElement.getBoundingClientRect();
-    const mouse = new THREE.Vector2(
-      ((event.clientX - rect.left) / rect.width) * 2 - 1,
-      -((event.clientY - rect.top) / rect.height) * 2 + 1
-    );
+    const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
+    // Create a raycaster
     const raycaster = new THREE.Raycaster();
-    raycaster.setFromCamera(mouse, this.camera.getCamera());
+    raycaster.setFromCamera(new THREE.Vector2(x, y), this.camera.getCamera());
 
-    // Intersect with ground plane
-    const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-    const intersection = new THREE.Vector3();
-    raycaster.ray.intersectPlane(groundPlane, intersection);
-
-    return {
-      x: Math.round(intersection.x),
-      y: 0,
-      z: Math.round(intersection.z)
-    };
-  }
-
-  private handleBuildAction(position: Position): void {
-    if (!this.park.canBuildAt(position)) {
-      this.showMessage('Cannot build here!');
-      return;
-    }
-
-    switch (this.currentTool) {
-      case BuildTool.RIDE:
-        this.buildRide(position);
-        break;
-      case BuildTool.SHOP:
-        this.buildShop(position);
-        break;
-      case BuildTool.PATH:
-        this.buildPath(position);
-        break;
-      case BuildTool.DECORATION:
-        this.buildDecoration(position);
-        break;
-      case BuildTool.DELETE:
-        this.deleteBuilding(position);
-        break;
-    }
-  }
-
-  private buildRide(position: Position): void {
-    const rideId = `ride_${Date.now()}`;
-    const ride = Ride.createRollerCoaster(rideId, position);
+    // Check for intersections with scene objects
+    const intersects = raycaster.intersectObjects(this.scene.getScene().children, true);
     
-    if (this.park.addRide(ride)) {
-      this.scene.addRide(ride);
-      this.showMessage(`Built ${ride.name} for $${ride.cost.money}`);
-      this.updateUI();
-    } else {
-      this.showMessage('Not enough money!');
+    if (intersects.length > 0) {
+      const intersection = intersects[0];
+      console.log('Clicked on:', intersection.object.name || 'unnamed object');
+      console.log('Position:', intersection.point);
+      
+      // Emit click event for other systems to handle
+      this.eventManager.emit('terrain-click', {
+        position: intersection.point,
+        object: intersection.object
+      });
     }
-  }
-
-  private buildShop(position: Position): void {
-    // Simplified shop building
-    this.showMessage('Shop building not implemented yet');
-  }
-
-  private buildPath(position: Position): void {
-    // Simplified path building
-    this.scene.addPath(position);
-    this.showMessage('Path built');
-  }
-
-  private buildDecoration(position: Position): void {
-    this.scene.addDecoration(position);
-    this.showMessage('Decoration added');
-  }
-
-  private deleteBuilding(position: Position): void {
-    const ride = this.park.getRideAt(position);
-    if (ride) {
-      this.park.removeRide(ride.id);
-      this.scene.removeRide(ride.id);
-      this.showMessage(`Removed ${ride.name}`);
-      this.updateUI();
-    }
-  }
-
-  private updateCursor(): void {
-    const canvas = this.renderer.domElement;
-    switch (this.currentTool) {
-      case BuildTool.DELETE:
-        canvas.style.cursor = 'crosshair';
-        break;
-      case BuildTool.NONE:
-        canvas.style.cursor = 'default';
-        break;
-      default:
-        canvas.style.cursor = 'copy';
-        break;
-    }
-  }
-
-  private showMessage(text: string): void {
-    // Simple message system (you could make this more sophisticated)
-    console.log(text);
-  }
-
-  private updateUI(): void {
-    this.eventManager.emit('stats-updated', this.park.stats);
   }
 
   public start(): void {
-    this.gameState = GameState.PLAYING;
-    this.scene.initialize();
-    this.gameLoop();
+    if (this.animationId !== null) return;
+    
+    this.lastTime = performance.now();
+    this.animate();
+  }
+
+  public stop(): void {
+    if (this.animationId !== null) {
+      cancelAnimationFrame(this.animationId);
+      this.animationId = null;
+    }
   }
 
   public pause(): void {
-    this.gameState = this.gameState === GameState.PAUSED ? GameState.PLAYING : GameState.PAUSED;
+    this.isPaused = true;
   }
 
-  private gameLoop = (currentTime: number = 0): void => {
-    const deltaTime = (currentTime - this.lastTime) / 1000;
+  public resume(): void {
+    this.isPaused = false;
+  }
+
+  public togglePause(): void {
+    this.isPaused = !this.isPaused;
+    console.log(this.isPaused ? 'Game paused' : 'Game resumed');
+  }
+
+  public handleResize(): void {
+    const canvas = this.renderer.domElement;
+    const container = canvas.parentElement;
+    
+    if (container) {
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      
+      this.renderer.setSize(width, height);
+      this.camera.handleResize();
+      
+      console.log(`Resized to ${width}x${height}`);
+    }
+  }
+
+  private animate(): void {
+    this.animationId = requestAnimationFrame(() => this.animate());
+
+    const currentTime = performance.now();
+    const deltaTime = (currentTime - this.lastTime) / 1000; // Convert to seconds
     this.lastTime = currentTime;
 
-    if (this.gameState === GameState.PLAYING) {
-      // Update game logic
-      this.park.update(deltaTime * this.gameSpeed);
-      this.scene.update(deltaTime);
-      this.camera.update(deltaTime);
-      
-      // Update UI periodically
-      if (Math.floor(currentTime / 1000) % 2 === 0) {
-        this.updateUI();
-      }
+    if (!this.isPaused) {
+      this.update(deltaTime);
     }
 
-    // Render
+    this.render();
+  }
+
+  private update(deltaTime: number): void {
+    // Update camera
+    this.camera.update(deltaTime);
+
+    // Update park simulation
+    this.park.update(deltaTime);
+
+    // Update scene
+    this.scene.update(deltaTime);
+
+    // Emit stats update every second (approximately)
+    if (Math.floor(this.lastTime / 1000) !== Math.floor((this.lastTime - deltaTime * 1000) / 1000)) {
+      this.emitStatsUpdate();
+    }
+  }
+
+  private render(): void {
     this.renderer.render(this.scene.getScene(), this.camera.getCamera());
-    
-    requestAnimationFrame(this.gameLoop);
-  };
+  }
+
+  private emitStatsUpdate(): void {
+    const stats: GameStats = {
+      money: this.park.stats.money,
+      visitors: this.park.stats.visitors,
+      happiness: this.park.stats.happiness,
+      reputation: this.park.stats.reputation
+    };
+
+    this.eventManager.emit('stats-updated', stats);
+  }
 
   public getPark(): Park {
     return this.park;
   }
 
-  public getEventManager(): EventManager {
-    return this.eventManager;
+  public getScene(): Scene {
+    return this.scene;
+  }
+
+  public getRenderer(): THREE.WebGLRenderer {
+    return this.renderer;
+  }
+
+  public getCamera(): Camera {
+    return this.camera;
   }
 
   public dispose(): void {
-    this.renderer.dispose();
+    // Stop animation loop
+    this.stop();
+
+    // Dispose of Three.js resources
     this.scene.dispose();
+    this.renderer.dispose();
+
+    // Clear event listeners
+    window.removeEventListener('keydown', this.handleKeyDown);
+    window.removeEventListener('keyup', this.handleKeyUp);
+
+    console.log('Engine disposed');
   }
+
+  private handleKeyDown = (event: KeyboardEvent): void => {
+    this.keys[event.code] = true;
+  };
+
+  private handleKeyUp = (event: KeyboardEvent): void => {
+    this.keys[event.code] = false;
+  };
 }
