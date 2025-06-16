@@ -3,7 +3,8 @@ import { Menu } from './ui/Menu';
 import { GameUI } from './ui/GameUI';
 import EventManager from './utils/EventManager';
 import { AssetLoader } from './utils/AssetLoader';
-import { Park } from './entities/Park'; // Park might be managed by Engine or Game directly
+import { Park } from './entities/Park';
+import { AssetType } from './types';
 
 class Game {
   private engine!: Engine;
@@ -60,7 +61,7 @@ class Game {
 
     // Load assets
     try {
-      await this.assetLoader.loadAssets();
+      await this.assetLoader.loadAssets([]);
       // console.log("Asset loading complete in initializeGameSystems.");
     } catch (error) {
       console.error("Failed to load assets during initialization:", error);
@@ -107,7 +108,7 @@ class Game {
 
     // Initialize GameUI with starting stats
     this.gameUI.updateStats(this.park.stats);
-    this.gameUI.setAvailableRides(this.assetLoader.getAssetConfigs().filter(ac => ac.type === 'MODEL')); // Example
+    this.gameUI.setAvailableRides(this.assetLoader.getAssetConfigs().filter(ac => ac.type === AssetType.MODEL)); // Example
     this.gameUI.show();
 
     this.engine.start(); // Start the game loop

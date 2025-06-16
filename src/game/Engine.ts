@@ -196,7 +196,11 @@ export class Engine {
       reputation: this.park.stats.reputation
     };
 
-    this.eventManager.emit('stats-updated', stats);
+    this.eventManager.emit('statsUpdated', stats);
+  }
+
+  public setPark(park: Park): void {
+    this.park = park;
   }
 
   public getPark(): Park {

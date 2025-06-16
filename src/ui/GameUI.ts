@@ -1,5 +1,5 @@
-import { GameStats, BuildTool } from '@/types';
-import { EventManager } from '@/utils/EventManager';
+import { GameStats, BuildTool, AssetConfig } from '../types';
+import { EventManager } from '../utils/EventManager';
 
 export class GameUI {
   private eventManager: EventManager;
@@ -48,7 +48,7 @@ export class GameUI {
     });
 
     // Listen for stats updates
-    this.eventManager.on('stats-updated', (stats: GameStats) => {
+    this.eventManager.on('statsUpdated', (stats: GameStats) => {
       this.updateStats(stats);
     });
   }
@@ -183,6 +183,12 @@ export class GameUI {
     // This could show a submenu for specific building types
     console.log(`Build menu for ${tool}`);
     this.showMessage(`${tool} build menu opened`);
+  }
+
+  public setAvailableRides(rideConfigs: AssetConfig[]): void {
+    // Implementation for setting available rides in the UI
+    console.log('Setting available rides:', rideConfigs);
+    // This method would populate the build menu with available rides
   }
 
   public isShowing(): boolean {

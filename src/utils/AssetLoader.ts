@@ -33,31 +33,34 @@ export class AssetLoader {
     const ferrisWheelRideConfig: RideConfig = {
       id: 'ferrisWheelRide',
       name: 'Ferris Wheel',
-      assetId: 'ferrisWheelModel',
-      cost: { money: 10000, maintenance: 200 },
-      stats: { excitement: 60, intensity: 30, nausea: 20 },
+      type: 'ferris_wheel',
       capacity: 20,
-      ticketPrice: 8,
+      cost: { money: 10000, maintenance: 200 },
+      excitement: 60,
+      intensity: 30,
+      nausea: 20,
     };
 
     const rollerCoasterRideConfig: RideConfig = {
       id: 'rollerCoasterRide',
       name: 'Roller Coaster',
-      assetId: 'rollerCoasterModel',
-      cost: { money: 25000, maintenance: 500 },
-      stats: { excitement: 90, intensity: 80, nausea: 50 },
+      type: 'roller_coaster',
       capacity: 16,
-      ticketPrice: 15,
+      cost: { money: 25000, maintenance: 500 },
+      excitement: 90,
+      intensity: 80,
+      nausea: 50,
     };
 
     const carouselRideConfig: RideConfig = {
       id: 'carouselRide',
       name: 'Carousel',
-      assetId: 'carouselModel',
-      cost: { money: 5000, maintenance: 100 },
-      stats: { excitement: 40, intensity: 10, nausea: 5 },
+      type: 'carousel',
       capacity: 24,
-      ticketPrice: 5,
+      cost: { money: 5000, maintenance: 100 },
+      excitement: 40,
+      intensity: 10,
+      nausea: 5,
     };
 
     this.assetConfigs = [

@@ -9,14 +9,14 @@ interface EventListeners {
 export class EventManager {
   private events: { [key: string]: Function[] } = {};
 
-  public on<E extends EventName>(eventName: E, callback: (payload: Extract<GameEvent, { type: E }>['payload']) => void): void {
+  public on<E extends EventName>(eventName: E, callback: (payload?: any) => void): void {
     if (!this.events[eventName]) {
       this.events[eventName] = [];
     }
     this.events[eventName].push(callback as EventCallback);
   }
 
-  public off<E extends EventName>(eventName: E, callback: (payload: Extract<GameEvent, { type: E }>['payload']) => void): void {
+  public off<E extends EventName>(eventName: E, callback: (payload?: any) => void): void {
     if (!this.events[eventName]) {
       return;
     }
@@ -25,7 +25,7 @@ export class EventManager {
     );
   }
 
-  public emit<E extends EventName>(eventName: E, payload?: Extract<GameEvent, { type: E }>['payload']): void {
+  public emit<E extends EventName>(eventName: E, payload?: any): void {
     if (!this.events[eventName]) {
       return;
     }
@@ -42,9 +42,9 @@ export class EventManager {
   public once(event: string, callback: Function): void {
     const onceCallback = (...args: any[]) => {
       callback(...args);
-      this.off(event, onceCallback);
+      this.off(event as any, onceCallback);
     };
-    this.on(event, onceCallback);
+    this.on(event as any, onceCallback);
   }
 
   public removeAllListeners(event?: string): void {

@@ -20,8 +20,8 @@ module.exports = {
     },
   },
   output: {
-    filename: 'index.js',
-    path: path.resolve(__dirname, 'public'),
+    filename: 'bundle.js',
+    path: path.resolve(__dirname, 'public/dist'),
     clean: false,
   },
   plugins: [

@@ -86,7 +86,13 @@ export type GameEvent =
   | { type: 'buildRide', payload: { rideId: string, position: Position } }
   | { type: 'bulldoze', payload: { position: Position } }
   | { type: 'statsUpdated', payload: GameStats }
-  | { type: 'showMessage', payload: { message: string, duration?: number } };
+  | { type: 'showMessage', payload: { message: string, duration?: number } }
+  | { type: 'start-new-game' }
+  | { type: 'load-game' }
+  | { type: 'settings' }
+  | { type: 'game-pause' }
+  | { type: 'tool-selected', payload: BuildTool }
+  | { type: 'terrain-click', payload: { position: Position; object?: any } };
 
 export type EventCallback = (data?: any) => void;
 

@@ -63,7 +63,7 @@ export class Menu {
 
   private setupEventListeners(): void {
     this.newGameButton.addEventListener('click', () => {
-      this.eventManager.emit('start-new-game');
+      this.eventManager.emit('startGame');
     });
 
     this.loadGameButton.addEventListener('click', () => {
@@ -71,11 +71,11 @@ export class Menu {
     });
 
     this.settingsButton.addEventListener('click', () => {
-      this.eventManager.emit('settings');
+      this.eventManager.emit('openSettings');
     });
 
     this.closeSettingsButton.addEventListener('click', () => {
-      this.settingsPanel.classList.add('hidden');
+      this.eventManager.emit('closeSettings');
     });
 
     // ... other event listeners
@@ -93,5 +93,17 @@ export class Menu {
 
   public isVisible(): boolean {
     return !this.mainMenuPanel.classList.contains('hidden');
+  }
+
+  public showSettings(): void {
+    this.settingsPanel.classList.remove('hidden');
+  }
+
+  public hideSettings(): void {
+    this.settingsPanel.classList.add('hidden');
+  }
+
+  public hideMainMenu(): void {
+    this.mainMenuPanel.classList.add('hidden');
   }
 }
