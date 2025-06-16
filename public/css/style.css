@@ -326,6 +326,21 @@ body {
     align-items: center;
 }
 
+#game-status-container {
+    margin-left: auto;
+    padding: 0 10px;
+}
+
+#game-status {
+    font-size: 12px;
+    font-weight: bold;
+    color: #333;
+    background: rgba(255,255,255,0.8);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid #999;
+}
+
 .stat-item {
     display: flex;
     align-items: center;
