@@ -26,8 +26,12 @@ export class GameUI {
     });
 
     // Listen for messages to display
-    this.eventManager.on('showMessage', (data: { message: string, duration?: number }) => {
-      this.showMessage(data.message, data.duration || 2000);
+    this.eventManager.on('showMessage', (data: { 
+      message: string, 
+      type?: 'success' | 'error' | 'warning' | 'info',
+      duration?: number 
+    }) => {
+      this.showMessage(data.message, data.type || 'info', data.duration || 2000);
     });
   }
 
@@ -53,32 +57,56 @@ export class GameUI {
     this.bottomUI.hide();
   }
 
-  private showMessage(message: string, duration: number = 2000): void {
+  private showMessage(message: string, type: 'success' | 'error' | 'warning' | 'info' = 'info', duration: number = 2000): void {
     // Create message element
     const messageDiv = document.createElement('div');
     messageDiv.className = 'game-message';
     messageDiv.textContent = message;
+    
+    // Define colors for different message types
+    const colors = {
+      success: '#4CAF50',
+      error: '#f44336',
+      warning: '#ff9800',
+      info: '#2196F3'
+    };
+    
+    const backgroundColor = colors[type];
+    
     messageDiv.style.cssText = `
       position: fixed;
       top: 70px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.8);
+      background: ${backgroundColor}dd;
       color: white;
-      padding: 10px 20px;
-      border-radius: 5px;
+      padding: 12px 24px;
+      border-radius: 6px;
+      border: 2px solid ${backgroundColor};
       font-family: 'MS Sans Serif', sans-serif;
-      font-size: 12px;
+      font-size: 13px;
+      font-weight: bold;
       z-index: 10000;
       pointer-events: none;
-      transition: opacity 0.3s ease;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      max-width: 400px;
+      text-align: center;
+      word-wrap: break-word;
     `;
 
     document.body.appendChild(messageDiv);
 
+    // Animate in
+    requestAnimationFrame(() => {
+      messageDiv.style.transform = 'translateX(-50%) translateY(10px)';
+      messageDiv.style.opacity = '1';
+    });
+
     // Fade out and remove after duration
     setTimeout(() => {
       messageDiv.style.opacity = '0';
+      messageDiv.style.transform = 'translateX(-50%) translateY(-10px)';
       setTimeout(() => {
         if (messageDiv.parentNode) {
           messageDiv.parentNode.removeChild(messageDiv);

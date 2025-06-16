@@ -6,6 +6,7 @@ import { EventManager } from '../utils/EventManager';
 import { Park } from '../entities/Park';
 import Ride from '../entities/Ride';
 import { GameManager } from './GameManager';
+import { BuildManager } from './BuildManager';
 import { GameStats, BuildTool } from '../types';
 
 export class Engine {
@@ -16,12 +17,15 @@ export class Engine {
   private eventManager: EventManager;
   private park: Park;
   private gameManager: GameManager;
+  private buildManager: BuildManager;
   private animationId: number | null = null;
   private lastTime: number = 0;
   private isPaused: boolean = false;
   private gameSpeed: number = 1;
   private currentTool: BuildTool = BuildTool.NONE;
   private keys: { [key: string]: boolean } = {};
+  private showBuildGrid: boolean = false;
+  private buildGridGroup: THREE.Group | null = null;
 
   constructor(canvas: HTMLCanvasElement, assetLoader: AssetLoader, eventManager: EventManager) {
     this.assetLoader = assetLoader;
@@ -62,6 +66,9 @@ export class Engine {
     
     // Initialize game manager
     this.gameManager = new GameManager(this.eventManager, this.park);
+    
+    // Initialize build manager
+    this.buildManager = new BuildManager(this.eventManager, this.park, this.park.size);
 
     // Setup controls
     this.setupControls();
@@ -141,163 +148,20 @@ export class Engine {
   private handleBuildAction(position: THREE.Vector3): void {
     switch (this.currentTool) {
       case BuildTool.RIDE:
-        this.buildRide(position);
-        break;
       case BuildTool.SHOP:
-        this.buildShop(position);
-        break;
       case BuildTool.PATH:
-        this.buildPath(position);
-        break;
       case BuildTool.DECORATION:
-        this.buildDecoration(position);
+        this.buildManager.buildObject(position, this.currentTool, this.scene);
         break;
       case BuildTool.DELETE:
-        this.deleteObject(position);
+        this.buildManager.deleteObject(position, this.scene);
         break;
       default:
-        console.log('No tool selected');
-    }
-  }
-
-  private buildRide(position: THREE.Vector3): void {
-    // Cycle through different ride types for variety
-    const rideTypes = ['ferris_wheel', 'roller_coaster', 'carousel', 'bumper_cars', 'water_slide', 'haunted_house', 'drop_tower', 'spinning_teacups'];
-    const randomType = rideTypes[Math.floor(Math.random() * rideTypes.length)];
-    
-    let ride;
-    const rideId = `ride_${Date.now()}`;
-    const ridePosition = { x: position.x, y: 0, z: position.z };
-    
-    // Create the appropriate ride type
-    switch (randomType) {
-      case 'ferris_wheel':
-        ride = Ride.createFerrisWheel(rideId, ridePosition);
-        break;
-      case 'roller_coaster':
-        ride = Ride.createRollerCoaster(rideId, ridePosition);
-        break;
-      case 'carousel':
-        ride = Ride.createCarousel(rideId, ridePosition);
-        break;
-      case 'bumper_cars':
-        ride = Ride.createBumperCars(rideId, ridePosition);
-        break;
-      case 'water_slide':
-        ride = Ride.createWaterSlide(rideId, ridePosition);
-        break;
-      case 'haunted_house':
-        ride = Ride.createHauntedHouse(rideId, ridePosition);
-        break;
-      case 'drop_tower':
-        ride = Ride.createDropTower(rideId, ridePosition);
-        break;
-      case 'spinning_teacups':
-        ride = Ride.createSpinningTeacups(rideId, ridePosition);
-        break;
-      default:
-        ride = Ride.createCarousel(rideId, ridePosition);
-    }
-    
-    // Check if player has enough money
-    if (this.park.stats.money < ride.cost.money) {
-      // Simple alert for now - in a real game you'd show a proper notification
-      alert(`You need $${ride.cost.money} to build ${ride.name}. You have $${this.park.stats.money}.`);
-      return;
-    }
-    
-    // Deduct cost and add ride
-    this.park.stats.money -= ride.cost.money;
-    this.park.addRide(ride);
-    
-    // Create and add the 3D mesh
-    const rideMesh = ride.createMesh();
-    rideMesh.position.set(position.x, 0, position.z);
-    rideMesh.name = rideId;
-    rideMesh.castShadow = true;
-    
-    this.scene.addObject(rideMesh);
-    
-    // Simple success message
-    alert(`${ride.name} has been built for $${ride.cost.money}!`);
-  }
-
-  private buildShop(position: THREE.Vector3): void {
-    console.log('Building shop at:', position);
-    
-    const shopGeometry = new THREE.BoxGeometry(3, 3, 3);
-    const shopMaterial = new THREE.MeshLambertMaterial({ color: 0x4ECDC4 });
-    const shopMesh = new THREE.Mesh(shopGeometry, shopMaterial);
-    
-    shopMesh.position.set(position.x, 1.5, position.z);
-    shopMesh.name = `shop_${Date.now()}`;
-    shopMesh.castShadow = true;
-    
-    this.scene.addObject(shopMesh);
-    console.log('Shop built successfully!');
-  }
-
-  private buildPath(position: THREE.Vector3): void {
-    console.log('Building path at:', position);
-    
-    const pathGeometry = new THREE.BoxGeometry(2, 0.1, 2);
-    const pathMaterial = new THREE.MeshLambertMaterial({ color: 0x8B7355 });
-    const pathMesh = new THREE.Mesh(pathGeometry, pathMaterial);
-    
-    pathMesh.position.set(position.x, 0.05, position.z);
-    pathMesh.name = `path_${Date.now()}`;
-    pathMesh.receiveShadow = true;
-    
-    this.scene.addObject(pathMesh);
-    console.log('Path built successfully!');
-  }
-
-  private buildDecoration(position: THREE.Vector3): void {
-    console.log('Building decoration at:', position);
-    
-    // Random decoration
-    const decorations = [
-      () => {
-        const treeGeometry = new THREE.ConeGeometry(1, 4, 8);
-        const treeMaterial = new THREE.MeshLambertMaterial({ color: 0x228B22 });
-        return new THREE.Mesh(treeGeometry, treeMaterial);
-      },
-      () => {
-        const benchGeometry = new THREE.BoxGeometry(2, 0.5, 0.5);
-        const benchMaterial = new THREE.MeshLambertMaterial({ color: 0x8B4513 });
-        return new THREE.Mesh(benchGeometry, benchMaterial);
-      }
-    ];
-    
-    const decoration = decorations[Math.floor(Math.random() * decorations.length)]();
-    decoration.position.set(position.x, 1, position.z);
-    decoration.name = `decoration_${Date.now()}`;
-    decoration.castShadow = true;
-    
-    this.scene.addObject(decoration);
-    console.log('Decoration built successfully!');
-  }
-
-  private deleteObject(position: THREE.Vector3): void {
-    console.log('Deleting object at:', position);
-    
-    // Find objects near the click position
-    const objectsToDelete = this.scene.getScene().children.filter(obj => {
-      if (obj.name.startsWith('ride_') || obj.name.startsWith('shop_') || 
-          obj.name.startsWith('path_') || obj.name.startsWith('decoration_')) {
-        const distance = obj.position.distanceTo(position);
-        return distance < 5; // Within 5 units
-      }
-      return false;
-    });
-    
-    objectsToDelete.forEach(obj => {
-      this.scene.removeObject(obj);
-      console.log('Deleted:', obj.name);
-    });
-    
-    if (objectsToDelete.length === 0) {
-      console.log('No objects found to delete');
+        this.eventManager.emit('showMessage', {
+          message: 'Select a building tool first',
+          type: 'info',
+          duration: 1500
+        });
     }
   }
 
