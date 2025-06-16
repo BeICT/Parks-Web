@@ -4,7 +4,7 @@ import { Camera } from './Camera';
 import { AssetLoader } from '../utils/AssetLoader';
 import { EventManager } from '../utils/EventManager';
 import { Park } from '../entities/Park';
-import { GameStats } from '../types';
+import { GameStats, BuildTool } from '../types';
 
 export class Engine {
   private scene: Scene;
@@ -16,6 +16,8 @@ export class Engine {
   private animationId: number | null = null;
   private lastTime: number = 0;
   private isPaused: boolean = false;
+  private gameSpeed: number = 1;
+  private currentTool: BuildTool = BuildTool.NONE;
   private keys: { [key: string]: boolean } = {};
 
   constructor(canvas: HTMLCanvasElement, assetLoader: AssetLoader, eventManager: EventManager) {
@@ -66,6 +68,9 @@ export class Engine {
       
       // Setup camera controls
       this.camera.setupMovementControls(this.keys);
+      
+      // Setup event listeners
+      this.setupGameEventListeners();
       
       // Start render loop
       this.start();
@@ -122,6 +127,39 @@ export class Engine {
         object: intersection.object
       });
     }
+  }
+
+  private setupGameEventListeners(): void {
+    // Camera controls from toolbar
+    this.eventManager.on('camera-zoom', (data: { direction: string }) => {
+      if (data.direction === 'out') {
+        this.camera.zoomOut();
+      } else if (data.direction === 'in') {
+        this.camera.zoomIn();
+      }
+    });
+
+    this.eventManager.on('camera-rotate', () => {
+      this.camera.rotate();
+    });
+
+    // Game controls
+    this.eventManager.on('game-pause', (isPaused: boolean) => {
+      if (isPaused) {
+        this.pause();
+      } else {
+        this.resume();
+      }
+    });
+
+    this.eventManager.on('game-speed', (speed: number) => {
+      this.setGameSpeed(speed);
+    });
+
+    // Tool selection
+    this.eventManager.on('tool-selected', (tool: BuildTool) => {
+      this.setCurrentTool(tool);
+    });
   }
 
   public start(): void {
@@ -244,6 +282,28 @@ export class Engine {
 
   public getCamera(): Camera {
     return this.camera;
+  }
+
+  public setGameSpeed(speed: number): void {
+    this.gameSpeed = Math.max(1, Math.min(4, speed));
+    console.log('Game speed set to:', this.gameSpeed);
+  }
+
+  public setCurrentTool(tool: BuildTool): void {
+    this.currentTool = tool;
+    console.log('Current tool set to:', tool);
+  }
+
+  public getCurrentTool(): BuildTool {
+    return this.currentTool;
+  }
+
+  public getGameSpeed(): number {
+    return this.gameSpeed;
+  }
+
+  public isGamePaused(): boolean {
+    return this.isPaused;
   }
 
   public dispose(): void {
