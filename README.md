@@ -176,3 +176,48 @@ public/
 - **Scene** - 3D scene setup and object management
 - **UI System** - Modal windows and interface management
 - **Event System** - Decoupled communication between components
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## About BeICT
+
+Park Tycoon is created and maintained by [BeICT](https://beict.nl), a technology company focused on innovative web applications and digital experiences.
+
+**BeICT** specializes in:
+- Custom web application development
+- 3D visualization and interactive experiences
+- Progressive web applications
+- Modern frontend technologies
+
+### Contact
+
+- **Website**: [https://beict.nl](https://beict.nl)
+- **Email**: info@beict.nl
+
+## Acknowledgments
+
+- Inspired by classic theme park management games (RollerCoaster Tycoon, Planet Coaster)
+- Three.js community for excellent 3D web graphics library
+- Open source contributors and community testers
+- Theme park enthusiasts and gaming communities worldwide
+
+## Project Stats
+
+![GitHub stars](https://img.shields.io/github/stars/BeICT/parks-web)
+![GitHub forks](https://img.shields.io/github/forks/BeICT/parks-web)
+![GitHub issues](https://img.shields.io/github/issues/BeICT/parks-web)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/BeICT/parks-web)
+
+- **Language**: TypeScript
+- **Framework**: Three.js
+- **License**: MIT
+- **Status**: Active Development
+- **Version**: 1.0.0 Community Edition
+
+---
+
+**Ready to build your theme park empire? Start playing Park Tycoon today!**
+
+[Play Online](https://your-demo-url.com) | [Report Bug](https://github.com/BeICT/parks-web/issues) | [Request Feature](https://github.com/BeICT/parks-web/issues)
