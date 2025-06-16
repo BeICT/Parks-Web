@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 import { Scene } from './Scene';
 import { Camera } from './Camera';
-import { AssetLoader } from '@/utils/AssetLoader';
-import { EventManager } from '@/utils/EventManager';
-import { Park } from '@/entities/Park';
-import { GameStats } from '@/types';
+import { AssetLoader } from '../utils/AssetLoader';
+import { EventManager } from '../utils/EventManager';
+import { Park } from '../entities/Park';
+import { GameStats } from '../types';
 
 export class Engine {
   private scene: Scene;

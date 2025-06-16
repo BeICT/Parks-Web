@@ -9,7 +9,6 @@ export class Camera {
   private angle: number = 0;
   private moveSpeed: number = 20;
   private rotateSpeed: number = 1;
-  private zoomSpeed: number = 10;
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -38,7 +37,7 @@ export class Camera {
     let lastMouseY = 0;
 
     this.container.addEventListener('mousedown', (event) => {
-      if (event.button === 2) { // Right mouse button
+      if (event.button === 2) {
         isDragging = true;
         lastMouseX = event.clientX;
         lastMouseY = event.clientY;
@@ -65,12 +64,10 @@ export class Camera {
       isDragging = false;
     });
 
-    // Disable context menu on right click
     this.container.addEventListener('contextmenu', (event) => {
       event.preventDefault();
     });
 
-    // Mouse wheel for zoom
     this.container.addEventListener('wheel', (event) => {
       this.distance = Math.max(10, Math.min(100, this.distance + event.deltaY * 0.01));
       this.updateCameraPosition();
@@ -79,7 +76,6 @@ export class Camera {
   }
 
   public setupMovementControls(keys: { [key: string]: boolean }): void {
-    // This will be called in the game loop to handle continuous movement
     this.handleMovement = (deltaTime: number) => {
       let moved = false;
       

@@ -19,15 +19,8 @@ class Game {
     this.assetLoader = new AssetLoader();
     this.menu = new Menu(this.eventManager);
     this.gameUI = new GameUI(this.eventManager);
-
-    // FIX 1: Safely get the loading screen element
-    const loadingScreenEl = document.getElementById('loading-screen');
-    if (!loadingScreenEl) {
-      // Throw a clear error if the element is missing, preventing crashes later.
-      throw new Error('Fatal Error: The #loading-screen element was not found in the DOM.');
-    }
-    this.loadingScreen = loadingScreenEl;
-
+    
+    this.loadingScreen = document.getElementById('loading-screen')!;
     this.setupEventListeners();
     this.initialize();
   }
@@ -37,14 +30,12 @@ class Game {
       this.startGame();
     });
 
-    // FIX 2: Use `alert` for placeholder features from the main menu.
-    // The GameUI is not visible when the main menu is active.
     this.eventManager.on('load-game', () => {
-      alert('Load game feature coming soon!');
+      this.showMessage('Load game feature coming soon!');
     });
 
     this.eventManager.on('settings', () => {
-      alert('Settings panel coming soon!');
+      this.showMessage('Settings panel coming soon!');
     });
 
     this.eventManager.on('game-pause', () => {
@@ -53,7 +44,6 @@ class Game {
       }
     });
 
-    // This event fires while the game is playing, so GameUI is visible.
     this.eventManager.on('tool-selected', (tool: string) => {
       console.log(`Selected tool: ${tool}`);
       this.showMessage(`${tool} tool selected`);
@@ -80,50 +70,43 @@ class Game {
     try {
       console.log('Initializing game...');
       this.showLoading(true);
-
+      
       this.assetLoader.createDefaultAssets();
       await this.loadGameAssets();
-
+      
       this.showLoading(false);
-      // After initial loading, show the main menu.
-      this.showMainMenu();
       console.log('Game initialized successfully');
     } catch (error) {
       console.error('Failed to initialize game:', error);
-      // FIX 3: Display initialization errors directly, as the game UI isn't ready.
-      this.showFatalError('Failed to initialize game. Please refresh the page.');
+      this.showLoading(false);
+      this.showError('Failed to initialize game. Please refresh the page.');
     }
   }
 
   private async loadGameAssets(): Promise<void> {
-    const assetsToLoad: LoadableAsset[] = [
-      // { id: 'grass-texture', type: 'texture' as const, url: './assets/textures/grass.jpg' },
-      // { id: 'ride-model', type: 'model' as const, url: './assets/models/ride.gltf' },
-    ];
+    const assetsToLoad: LoadableAsset[] = [];
 
     if (assetsToLoad.length > 0) {
       try {
         await this.assetLoader.loadAssets(assetsToLoad);
       } catch (error) {
-        console.warn('Some assets failed to load; using defaults:', error);
+        console.warn('Some assets failed to load, using defaults:', error);
       }
     }
 
-    // Simulate loading time for demo purposes.
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 500));
   }
 
   private async startGame(): Promise<void> {
     try {
       console.log('Starting new game...');
-
+      
+      this.showLoading(true);
       this.currentState = GameState.LOADING;
       this.menu.hide();
-      this.showLoading(true);
-
-      // A small delay gives the UI time to update.
+      
       await new Promise(resolve => setTimeout(resolve, 500));
-
+      
       const canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
       if (!canvas) {
         throw new Error('Game canvas not found');
@@ -131,18 +114,17 @@ class Game {
 
       this.engine = new Engine(canvas, this.assetLoader, this.eventManager);
       await this.engine.initialize();
-
+      
       this.gameUI.show();
+      this.showLoading(false);
       this.currentState = GameState.PLAYING;
-
-      console.log('Game started successfully');
+      
+      console.log('🎢 Game started successfully! Use WASD to move camera, Q/E to rotate, mouse wheel to zoom');
     } catch (error) {
       console.error('Failed to start game:', error);
+      this.showLoading(false);
       this.showError('Failed to start game. Please try again.');
-      this.showMainMenu(); // Always return to a safe state (the main menu).
-    } finally {
-        // Ensure the loading screen is always hidden after attempting to start.
-        this.showLoading(false);
+      this.showMainMenu();
     }
   }
 
@@ -157,26 +139,15 @@ class Game {
   }
 
   private showLoading(show: boolean): void {
-    // Check if loadingScreen exists to prevent errors if called during shutdown
-    if (this.loadingScreen) {
-        this.loadingScreen.classList.toggle('hidden', !show);
+    if (show) {
+      this.loadingScreen.classList.remove('hidden');
+    } else {
+      this.loadingScreen.classList.add('hidden');
     }
   }
 
   private showError(message: string): void {
-    // This method is intended for errors when the GameUI is visible.
     this.gameUI.showMessage(`❌ ${message}`);
-  }
-
-  // FIX 3 (Implementation): New method for fatal errors when UI is not ready.
-  private showFatalError(message: string): void {
-    this.showLoading(true); // Ensure the loading container is visible
-    this.loadingScreen.innerHTML = `
-      <div style="text-align: center; padding: 20px; color: #ff6b6b;">
-        <h2>An Error Occurred</h2>
-        <p>${message}</p>
-      </div>
-    `;
   }
 
   private showMessage(message: string): void {
@@ -186,12 +157,9 @@ class Game {
   private cleanup(): void {
     if (this.engine) {
       this.engine.dispose();
-      this.engine = null;
     }
-    console.log('Game resources cleaned up.');
   }
 
-  // Public methods for debugging
   public getCurrentState(): GameState {
     return this.currentState;
   }
@@ -204,16 +172,11 @@ class Game {
 document.addEventListener('DOMContentLoaded', () => {
   try {
     const game = new Game();
-    // Make the game instance available globally for debugging.
     (window as any).game = game;
     console.log('🎢 Park Tycoon initialized successfully!');
+    console.log('Click "New Game" to start building your theme park!');
   } catch (error) {
     console.error('Failed to initialize Park Tycoon:', error);
-    // Display a user-friendly message for critical startup failures.
-    document.body.innerHTML = `<div style="text-align: center; padding: 50px; font-family: sans-serif; color: red;">
-      <h1>Critical Error</h1>
-      <p>Could not start the game. Please check the console for details.</p>
-    </div>`;
   }
 });
 
